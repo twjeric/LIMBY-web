@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie-edge">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/particle-api-js/5/particle.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <title>My Chart.js Chart</title>
+</head>
+<body>
+  <div class="container">
+    <canvas id="myChart"></canvas>
+  </div>
+  <script>
+    /* Particle Section
+     *
+     */
+    //var Particle = require('particle-api-js');
+    var particle = new Particle();
+    var token;
+
+    // Particle Login
+    particle.login({username: 'ko.wing.bird@gmail.com', password: 'qaz123QAZ'}).then(
+      function(data) {
+        token = data.body.access_token;
+        window.alert(token)
+      },
+      function (err) {
+        console.log('Could not log in.', err);
+      }
+    );
+
+    const MAX_DATA_POINTS = 10;
+
+    // Data arrays
+    var times = []; // Time at which weight was recorded
+    var weights = []; // Recorded weights
+
+    // Initialize data arrays
+    for (i = 0; i < MAX_DATA_POINTS; i++)
+    {
+      weights.push(0);
+      times.push("");
+    }
+
+    // Gets the weight readings periodically from Photon
+    particle.getEventStream({ deviceId: '360057000351353530373132', auth: 'dcc66443d5fc252cfd0f03b5421017129a21bab1' }).then(function(stream) {
+      stream.on('event', function(data) {
+        console.log("Event: ", data.data);
+        console.log("Event time: ", data.published_at);
+
+        if (weights.length == MAX_DATA_POINTS) { // Holds last 5 weight values
+          weights.shift();
+          times.shift();
+        }
+        weights.push(data.data);
+        times.push(data.published_at);
+
+        /* Chart Code
+         *
+         */
+        let myChart = document.getElementById('myChart').getContext('2d');
+
+        //Global options
+        Chart.defaults.global.defaultFontFamily = 'Ariel';
+        Chart.defaults.global.defaultFontSize = 18;
+
+        let massPopChart = new Chart(myChart, {
+          // Graph Type
+          type: 'line', // Types: bar, horizontalBar, pie, line, doughnut, radar, polarArea
+
+          // Data Displayed
+          data:{
+            // x axis names
+            labels:times, // Array type
+            datasets:[{
+              label:'Perch Data',
+              // y axis values for each x axis label
+              data:weights,
+              backgroundColor:'rgba(66, 134, 244, .3)', // Color of line data, light blue
+              borderWidth:1, // Width of each weight node
+              borderColor:'#777',
+              hoverBorderWidth:3,
+              hoverBorderColor:'#000'
+            }]
+          },
+
+          // Graph Auxillary Options - title, legend, etc.
+          options:{
+            title:{
+              display:true,
+              text:'Bird Weight in Grams',
+              fontSize:25,
+              fontFamily: "Courier New"
+            },
+            legend:{
+              //position:'right',
+              display:false,
+              labels:{
+                fontColor:'#000'
+              }
+            },
+            scales: {
+                    xAxes: [{
+                            display: true,
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Weight'
+                            },
+                            fontFamily: "Courier New"
+                        }],
+                    yAxes: [{
+                            display: true,
+                            ticks: {
+                                beginAtZero: false,
+                                steps: 40,
+                                stepValue: 1000,
+                                min: -20000,
+                                max: 20000
+                            }
+                        }]
+                },
+            layout:{
+
+            }
+          }
+        });
+      });
+    });
+  </script>
+  <button type="button" class="btn btn-primary btn-lg" onclick="buttonFunc()">Refresh</button>
+  <script>
+    function buttonFunc()
+    {
+      window.alert("refresh");
+    }
+  </script>
+</body>
+</html>
