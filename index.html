@@ -16,7 +16,6 @@
   <button type="button" class="btn btn-primary btn-lg" onclick="ToggleLive()">Toggle Live Refresh</button>
   <p id="LiveToggleText">Live Data: On</p>
   <script>
-
     var isRefreshingLive = true;
     /* Particle Section
      *
@@ -68,7 +67,7 @@
     Chart.defaults.global.defaultFontFamily = 'Ariel';
     Chart.defaults.global.defaultFontSize = 18;
 
-    var massPopChart = new Chart(myChart, {
+    var weightChart = new Chart(myChart, {
       // Graph Type
       type: 'line', // Types: bar, horizontalBar, pie, line, doughnut, radar, polarArea
 
@@ -167,7 +166,7 @@
           }
         }
 
-        massPopChart.update();
+        weightChart.update();
       });
     });
 
