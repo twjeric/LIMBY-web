@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Smart Perch</title>
+	<link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+	<div class="header">
+		
+		<a href="#" class="active">Home</a>
+		<a href="#" class="topnav">My Chart</a>
+		<a href="#" class="topnav">My Profile</a>
+	</div>
+	<div id="sidebar">
+		<ul>
+			<li><a href="#">Daily Graph</a></li>
+			<li><a href="#">Weekly Graph</a></li>
+			<li><a href="#">Monthly Graph</a></li>
+			<li><a href="#">Select Time Period</a></li>
+			<li><a href="#">Other Stuff</a></li>
+		</ul>
+		<div id="sidebar-btn">
+			<span></span>
+			<span></span>
+			<span></span>
+		</div>
+	</div>
+	
+	<div>
+	<img src="Graph.png" alt="graph" style="width:40%" id="graph"></div>
+	
+	<button class="bt_button">Download pdf/csv</button>
+	
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js">
+	</script>
+	
+	<script>
+	$(document).ready(function(){
+		$('#sidebar-btn').click(function(){
+			$('#sidebar').toggleClass('visible');
+		});
+	});
+	</script>
+	
+	
+</body>
+</html>
