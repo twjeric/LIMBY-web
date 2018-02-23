@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var bcrypt = require('bcrypt');
+var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 var Particle = require('particle-api-js');
 var particle = new Particle();
@@ -38,25 +38,33 @@ router.get('/', async (req, res, next) => {
     // Query provided, try to connect to Particle cloud
     else {
         try {
-            const accessToken = await particle.login({username: req.query.email, password: req.query.password});
-            // Good credential, register this user
-            //// TODO2: Randomize the salt and save together in db
-            //// TODO3: Keep sync or change to async?
-            const saltRounds = 10;
-            var hash = bcrypt.hashSync(req.query.password, saltRounds);
-            await db.connect(config.mongodbUrl, config.dbName);
-            //// TODO4: Is there a way not have to save access token?
-            await db.insertOne(config.usersCollection, { "email": req.query.email, "hash": hash, "at": accessToken });
-            //// TODO5: Let user know they succeeded 
+            await db.find(config.usersCollection, { "email": req.query.email });
+            // User exists, redirect to login
+            //// TODO2: Let user know this account is already in db
             res.redirect('/login');
         } catch (err) {
-            //// TODO6: WHY THERE IS NO CUSTOM ERROR FOR PARTICLE JS ???
-            // if (err instanceof enfError) { // Bad credential, retry register with err msg
-                res.render('register', { "error": "Please double check your Particle credential" });
-            // } else {
-            //     next(err);
-            // }
-        }  
+            try {
+                const data = await particle.login({ username: req.query.email, password: req.query.password });
+                // Good credential, register this user
+                //// TODO3: Randomize the salt and save together in db
+                //// TODO4: Keep sync or change to async?
+                const saltRounds = 10;
+                var hash = bcrypt.hashSync(req.query.password, saltRounds);
+                await db.connect(config.mongodbUrl, config.dbName);
+                //// TODO5: Is there a way not have to save access token?
+                await db.insertOne(config.usersCollection, { "email": req.query.email, "hash": hash, "at": data.body.access_token });
+                //// TODO6: Let user know they succeeded 
+                res.redirect('/login');
+            } catch (err) {
+                //// TODO7: WHY THERE IS NO CUSTOM ERROR FOR PARTICLE JS ???
+                // if (err instanceof enfError) { // Bad credential, retry register with err msg
+                    res.status(401);
+                    res.render('register', { "error": "Please double check your Particle credential" });
+                // } else {
+                    // next(err);
+                // }
+            }  
+        }
     }
 })
 

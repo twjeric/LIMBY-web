@@ -1,0 +1,10 @@
+{
+    "fakeParticleAct": {
+        "email": "fake@fake.fake",
+        "password": "faketoo"
+    },
+    "realParticleAct": {
+        "email": "ko.wing.bird@gmail.com",
+        "password": "qaz123QAZ"
+    }
+}

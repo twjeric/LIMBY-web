@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var jwt = require('jsonwebtoken');
-var bcrypt = require('bcrypt');
+var bcrypt = require('bcryptjs');
 
 var config = require('../config.json');
 var enfError = require('../models/enf');
@@ -18,11 +18,10 @@ router.get('/', async (req, res, next) => {
             // Extract email from jwt cookie
             var token = req.cookies[config.jwtCookie];
             const decoded = await jwt.verify(token, config.secret); 
-            var tokenUser = decoded.sub;
+            var tokenEmail = decoded.sub;
             // Check if extracted email in db
-            const user = await db.find(config.usersCollection, { "email": tokenUser });
+            const user = await db.find(config.usersCollection, { "email": tokenEmail });
             // User logged in, redirect to events page
-            req.stat
             res.redirect('/events');
         
         } catch (err) {
@@ -48,10 +47,12 @@ router.get('/', async (req, res, next) => {
             }
             else {
                 // Bad, retry login with err msg
+                res.status(401);
                 res.render('login', { "error": "Check your password again!" });
             }
         } catch (err) {
             if (err instanceof enfError) { // No user found, retry login with err msg
+                res.status(401);
                 res.render('login', { "error": "Check your email and password again!" });
             } else {
                 next(err); 
