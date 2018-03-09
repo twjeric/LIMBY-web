@@ -14,7 +14,7 @@
     <canvas id="myChart"></canvas>
   </div>
   <button type="button" class="btn btn-primary btn-lg" onclick="ToggleLive()">Toggle Live Refresh</button>
-  <p id="LiveToggleText">Live Data: On</p>
+  <p style = "font-size:22px"; id="LiveToggleText">Live Data: On</p>
   <script>
     var isRefreshingLive = true;
     /* Particle Section
@@ -35,7 +35,7 @@
       }
     );
 
-    const MAX_DATA_POINTS = 10;
+    const MAX_DATA_POINTS = 50;
 
     // Data arrays
     /* displayedTimes and displayedWeights weights are hooked to the graph.
@@ -122,8 +122,8 @@
                             beginAtZero: false,
                             steps: 40,
                             //stepValue: 1000,
-                            min: -60000,
-                            max: 60000
+                            min: -5000,
+                            max: 0
                         }
                     }]
             },
@@ -148,7 +148,9 @@
 
         // Stores perch data into buffers
         storedWeights.push(data.data);
-        storedTimes.push(data.published_at);
+
+        var parsedTime = data.published_at.substring(11, 19);
+        storedTimes.push(parsedTime);
 
         if (isRefreshingLive == true)
         {
