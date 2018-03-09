@@ -70,6 +70,8 @@ DB.prototype.stream = function(collection, query) {
             }
             else {
                 resolve(col.find(query).
+                    addCursorFlag('tailable', true).
+                    addCursorFlag('awaitData', true).
                     stream());
             }
         })

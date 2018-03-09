@@ -5,14 +5,14 @@ var jwt = require('jsonwebtoken');
 var Particle = require('particle-api-js');
 var particle = new Particle();
 var fetch = require('node-fetch');
-var JSONStream = require('JSONStream')
+var JSONStream = require('JSONStream');
 
 var config = require('../config.json');
 var enfError = require('../models/enf');
 var DB = require('../models/db');
 var db = new DB();
 // Middleware to restrict access to only authenticated users
-var auth = require('../auth/auth');
+var apiAuth = require('../auth/apiAuth');
 
 // Register an user using Particle act
 router.post('/user', async (req, res, next) => {
@@ -62,11 +62,11 @@ router.post('/auth', async (req, res, next) => {
       res.json({'token': token});
     }
     else {
-      res.status(400).send("Bad password");
+      res.status(400).send("Incorrect email or password");
     }
   } catch (err) {
     if ((err instanceof jwt.JsonWebTokenError) || (err instanceof (enfError))) { // jwt verification failed
-      res.status(400).send("Bad credential");
+      res.status(400).send("Incorrect email or password");
     } else {
       res.status(400).send("Error authenticating user"); 
     }
@@ -74,7 +74,7 @@ router.post('/auth', async (req, res, next) => {
 })
 
 // Get past data
-router.get('/past/:start/:end', auth, async (req, res, next) => {
+router.get('/past/:start/:end', apiAuth, async (req, res, next) => {
   let start = parseInt(req.params.start);
   let end = parseInt(req.params.end);
   let now = new Date();
@@ -91,28 +91,32 @@ router.get('/past/:start/:end', auth, async (req, res, next) => {
 })
 
 // Get current data
-router.get('/stream', auth, async (req, res, next) => {
+router.get('/stream', apiAuth, async (req, res, next) => {
   try {
     await db.connect(config.mongodbUrl, config.dbName);
     let now = new Date();
-    db.stream(config.dataCollection, { $and: [{"userid": req.uid}, {"time":{$gte: 1}}] })
+    db.stream(config.dataCollection, { $and: [{"userid": req.uid}, {"time":{$gte: now.getTime()}}] })
     .then(
       function(stream) {
-        stream.pipe(JSONStream.stringify()).pipe(res);
+        stream.on('error', function(err) {
+          res.status(500).send(err.message);
+        });
+        stream.on('end', function() {
+          res.end();
+        });
+        stream.pipe(JSONStream.stringify()).pipe(res, {end:false});
       },
       function(err) {
-        next(err);
-        // res.status(400).send("Error getting data stream");
+        res.status(500).send("Error getting data stream");
       }
     )
   } catch (err) {
-    next(err);
-    // res.status(400).send("Error getting data stream");
+    res.status(500).send("Error getting data stream");
   }
 })
 
 // Start saving data from Particle cloud to db
-router.post('/start', auth, async (req, res, next) => {
+router.post('/start', apiAuth, async (req, res, next) => {
   try {
     await db.connect(config.mongodbUrl, config.dbName);
     const user = await db.find(config.usersCollection, { "userid": req.uid });
@@ -122,7 +126,7 @@ router.post('/start', auth, async (req, res, next) => {
     if (err instanceof (enfError)) {
       res.status(400).send("User not exist");
     } else {
-      res.status(400).send("Error starting saving data");
+      res.status(500).send("Error starting saving data");
     }    
   }
 })

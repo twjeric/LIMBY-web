@@ -3,21 +3,26 @@
   <head>
     <title>Login</title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
   </head>
   <body>
-    <% if (error){ %>
-      <div><%= error %></div>
+    <% if (err){ %>
+      <script>
+        toastr.warning(`<%=err%>`); 
+      </script>
     <% } %>
-    <form action="/login" method="get">
-        <div>
-          Email: <input type="text" name="email">
-        </div>
+    <form action="/login" method="post">
+      <div>
+        Email: <input type="text" name="email">
+      </div>
 
-        <div>
-          Password: <input type="password" name="password">
-        </div>
+      <div>
+        Password: <input type="password" name="password">
+      </div>
 
-        <button type="submit">Login</button>
+      <button type="submit">Login</button>
     </form>
 
     <form action="/register" method="get">
