@@ -83,7 +83,7 @@ router.get('/past/:start/:end', auth, async (req, res, next) => {
   }
   try {
     await db.connect(config.mongodbUrl, config.dbName);
-    const pastData = await db.find(config.dataCollection, { $and: [{"userid": 0}, {"time":{$gte: start}}, {"time":{$lte: end}}] }, 0);
+    const pastData = await db.find(config.dataCollection, { $and: [{"userid": req.uid}, {"time":{$gte: start}}, {"time":{$lte: end}}] }, 0);
     res.json(pastData);
   } catch (err) {
     res.status(400).send("Error getting past data");
@@ -95,7 +95,7 @@ router.get('/stream', auth, async (req, res, next) => {
   try {
     await db.connect(config.mongodbUrl, config.dbName);
     let now = new Date();
-    db.stream(config.dataCollection, { $and: [{"userid": 0}, {"time":{$gte: 1}}] })
+    db.stream(config.dataCollection, { $and: [{"userid": req.uid}, {"time":{$gte: 1}}] })
     .then(
       function(stream) {
         stream.pipe(JSONStream.stringify()).pipe(res);
@@ -146,7 +146,7 @@ function saveStreamData(connectedDB, userId, deviceId, accessToken) {
         let weight = parseFloat(data.data);
         let now = new Date();
         if (!isNaN(weight)) {
-          connectedDB.insertOne(config.dataCollection, { "userid": 0, "time": now.getTime(), "value": weight })
+          connectedDB.insertOne(config.dataCollection, { "userid": userId, "time": now.getTime(), "value": weight })
           .then(
             function(data) {},
             function(err) { console.log("Error connecting to database: " + err.message); }
