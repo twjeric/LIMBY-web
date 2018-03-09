@@ -1,8 +1,13 @@
 {
+    "particleEndPointUrl": "https://api.particle.io",
+    "particleDevicesApi": "/v1/devices",
     "endpointUrl": "http://localhost:3000",
     "mongodbUrl": "mongodb://localhost:27017",
-    "secret": "C-UFRaksvPKhx1txJYFcut3QGxsafPmwCY6SCly3G6c",
+    "secret": "8xpJl24Hur20veWeMrR5TFF7PE1NUCnmvHmL78AuSj5Pj74N3tLfAuSdqe7Hdkj",
     "dbName": "Limby",
     "usersCollection": "Users",
-    "jwtCookie": "limby-jwt"
+    "dataCollection": "Data",
+    "jwtCookie": "limby-jwt",
+    "salt": 10,
+    "streamTimeOut": 300000
 }
