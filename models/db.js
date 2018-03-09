@@ -50,10 +50,27 @@ DB.prototype.find = function(collection, query, limit=1) {
                         reject(new enfError);
                     }
                     // At least one entry found
-                    else { 
-                        resolve(foundArr.slice(0, limit));
+                    else {
+                        resolve(limit == 0 ? foundArr : foundArr.slice(0, limit));
                     }
                 })
+            }
+        })
+    })
+}
+
+// Get result for query as stream
+DB.prototype.stream = function(collection, query) {
+    var _this = this;
+    return new Promise(function (resolve, reject) {
+        _this.db.collection(collection, function(err, col) {
+            if (err) {
+                console.log("Error accessing collection: " + err.message);
+                reject(err);
+            }
+            else {
+                resolve(col.find(query).
+                    stream());
             }
         })
     })
