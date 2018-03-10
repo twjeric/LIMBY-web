@@ -13,8 +13,13 @@
   <div class="container">
     <canvas id="myChart"></canvas>
   </div>
-  <button type="button" class="btn btn-primary btn-lg" onclick="ToggleLive()">Toggle Live Refresh</button>
-  <p id="LiveToggleText">Live Data: On</p>
+   <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToHour()">Show Weight Past Hour</button>
+   <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToDay()">Show Weight Past Day</button>
+   <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToWeek()">Show Weight Past Week</button>
+   <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToMonth()">Show Weight Past Month</button>
+   <button type="button" class="btn btn-primary btn-lg" onclick="ToggleLive()">Toggle Live Refresh</button>
+   <p style = "font-size:18px"; id="LiveToggleText">Live Data: On</p>
+   <p style = "font-size:18px"; id="TimeScaleText">Showing Weights for Past: Hour</p>
   <script>
     var isRefreshingLive = true;
     /* Particle Section
@@ -43,7 +48,7 @@
 	
 	const AXES_BUFFER = 1000;
 	
-    const MAX_DATA_POINTS = 10;
+    const MAX_DATA_POINTS = 0;
 
     // Data arrays
     /* displayedTimes and displayedWeights weights are hooked to the graph.
@@ -130,9 +135,9 @@
                         },
                         fontFamily: 'Courier New',
                         ticks: {
-                            beginAtZero: false,
+                            beginAtZero: true,
                             steps: 40,
-                            //stepValue: 1000,
+                            stepSize: 1000,
                             min: -60000,
                             max: 60000
                         }
@@ -153,7 +158,7 @@
 	*/ 	
 	let nowTime = new Date();
 	var nowMs = nowTime.getTime();
-	var pastDayMs = nowMs - MS_IN_AN_HOUR;
+	var pastDayMs = nowMs - MS_IN_A_WEEK;
 	
 	var xhttp = new XMLHttpRequest();
 	var response;
@@ -175,7 +180,7 @@
 		       // Time display
 			   var date = new Date(response[r].time);
                var month = date.getMonth();
-               var day = date.getDay();
+               var day = date.getDate();
                var hour = date.getHours();
                var minute = date.getMinutes(); 
                if (minute < 10)
@@ -206,8 +211,10 @@
        }
 	   
 	   // Changes graph scale depending on currently displayed data
-	   weightChart.config.options.scales.yAxes[0].ticks.min = Math.min.apply(null, displayedWeights) - AXES_BUFFER;
-   	   weightChart.config.options.scales.yAxes[0].ticks.max = Math.max.apply(null, displayedWeights) + AXES_BUFFER;
+	   weightChart.config.options.scales.yAxes[0].ticks.min = 
+	       Math.round((Math.min.apply(null, displayedWeights) - AXES_BUFFER)/1000)*1000;
+   	   weightChart.config.options.scales.yAxes[0].ticks.max = 
+	       Math.round((Math.max.apply(null, displayedWeights) + AXES_BUFFER)/1000)*1000;
 
 	   weightChart.update();
     }
@@ -263,6 +270,24 @@
         document.getElementById("LiveToggleText").innerHTML = "Live Data: Off";
       }
     }
+	
+	// Changes Time Scale text to reflect current graph time scale
+	function ChangeTimeScaleToHour()
+	{
+		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for Past: Hour";
+	}
+	function ChangeTimeScaleToDay()
+	{
+		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for Past: Day";
+	}
+	function ChangeTimeScaleToWeek()
+	{
+		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for Past: Week";
+	}
+	function ChangeTimeScaleToMonth()
+	{
+		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for Past: Month";
+	}
   </script>
 </body>
 </html>
