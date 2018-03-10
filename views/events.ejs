@@ -43,6 +43,13 @@
 
     const MAX_DATA_POINTS = 50;
     
+	const MS_IN_AN_HOUR = 3600000;
+	const MS_IN_A_DAY = 86400000;
+	const MS_IN_A_WEEK = 604800000;
+	const MS_IN_A_MONTH = 2628000000;
+	
+	const AXES_BUFFER = 1000;
+		
     // Data arrays
     /* displayedTimes and displayedWeights weights are hooked to the graph.
        Changing them will automatically show on the graph.
@@ -53,6 +60,9 @@
     // These are the buffers that will hold the perch data before they are displayed to the graph
     var storedTimes = [];
     var storedWeights = [];
+	
+	var windowMinimum;
+	var windowMaximum;
 
     // Initialize data arrays
     for (i = 0; i < MAX_DATA_POINTS; i++)
@@ -63,7 +73,7 @@
       storedTimes.push(0);
       storedWeights.push("");
     }
-
+   
     /* Chart Code
      *
      */
@@ -139,9 +149,75 @@
       }
     });
 
+	
+	/* Requests previous weight data from server.
+	   1 Hour = 3,600,000 ms
+	   1 Day = 86,400,000 ms
+	   1 Week = 604,800,000 ms
+	   1 Month = 2,628,000,000 ms
+	*/ 	
+	let nowTime = new Date();
+	var nowMs = nowTime.getTime();
+	var pastDayMs = nowMs - MS_IN_A_DAY;
+	
+	var xhttp = new XMLHttpRequest();
+	var response;
+	
+    xhttp.open("GET", "http://localhost:3000/api/past/"+pastDayMs.toString()+ "/" +nowMs.toString(), true);
+    //xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send();
+    xhttp.addEventListener("readystatechange", processRequest, false);
+    function processRequest(e) 
+	{
+       if (xhttp.readyState == 4 && xhttp.status == 200) 
+	   {
+           response = JSON.parse(xhttp.responseText);
+           console.log(response[0].time);
 
+           // response structure: _id, userid, time, value
+		   for (var r in response)
+		   {
+		       // Time display
+			   var date = new Date(response[r].time);
+               var month = date.getMonth();
+               var day = date.getDay();
+               var hour = date.getHours();
+               var minute = date.getMinutes(); 
+               if (minute < 10)
+               {
+			       minute = "0"+minute;
+			   }	
+			   var second = date.getSeconds();			   
+               if (second < 10)
+               {
+			       second = "0"+second;
+			   }				  
+               var amPm;
+               if (hour >= 12)
+               {
+			       hour = 12 - (24 - hour);
+			       amPm = "PM";
+			   }			   
+			   else
+			   {
+			       amPm = "AM";
+			   }
+               var displayedDate = month+"/"+day+"  "+hour+":"+minute+":"+second+amPm;			   
+		       displayedTimes.push(displayedDate);
+			   
+			   // Weight display
+		       displayedWeights.push(response[r].value);
+		   }
+       }
+	   
+	   // Changes graph scale depending on currently displayed data
+	   weightChart.config.options.scales.yAxes[0].ticks.min = Math.min.apply(null, displayedWeights) - AXES_BUFFER;
+   	   weightChart.config.options.scales.yAxes[0].ticks.max = Math.max.apply(null, displayedWeights) + AXES_BUFFER;
+
+	   weightChart.update();
+    }
     // Gets the weight readings periodically from Photon
-    particle.getEventStream({ deviceId: '360057000351353530373132', auth: '5a495ca3a878380c969a64b0c0dcafbc8099888a' }).then(function(stream) {
+    /*particle.getEventStream({ deviceId: '360057000351353530373132', auth: '5a495ca3a878380c969a64b0c0dcafbc8099888a' }).then(function(stream) {
       stream.on('event', function(data) {
         console.log("Event: ", data.data);
         console.log("Event time: ", data.published_at);
@@ -176,7 +252,7 @@
 
         weightChart.update();
       });
-    });
+    });*/
 
     // Live Toggle Button
     function ToggleLive()
