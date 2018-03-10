@@ -13,20 +13,14 @@
   <div class="container">
     <canvas id="myChart"></canvas>
   </div>
-  <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToHour()">Show Weight Past Hour</button>
-  <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToDay()">Show Weight Past Day</button>
-  <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToWeek()">Show Weight Past Week</button>
-  <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToMonth()">Show Weight Past Month</button>
   <button type="button" class="btn btn-primary btn-lg" onclick="ToggleLive()">Toggle Live Refresh</button>
-  <p style = "font-size:18px"; id="LiveToggleText">Live Data: On</p>
-  <p style = "font-size:18px"; id="TimeScaleText">Showing Weights for Past: Hour</p>
+  <p id="LiveToggleText">Live Data: On</p>
   <script>
     var isRefreshingLive = true;
     /* Particle Section
      *
      */
     //var Particle = require('particle-api-js');
-	//var fetch = require('node-fetch');
     var particle = new Particle();
     var token;
 
@@ -41,8 +35,8 @@
       }
     );
 
-    const MAX_DATA_POINTS = 50;
-    
+    const MAX_DATA_POINTS = 10;
+
     // Data arrays
     /* displayedTimes and displayedWeights weights are hooked to the graph.
        Changing them will automatically show on the graph.
@@ -128,8 +122,8 @@
                             beginAtZero: false,
                             steps: 40,
                             //stepValue: 1000,
-                            min: -5000,
-                            max: 0
+                            min: -60000,
+                            max: 60000
                         }
                     }]
             },
@@ -154,9 +148,7 @@
 
         // Stores perch data into buffers
         storedWeights.push(data.data);
-
-        var parsedTime = data.published_at.substring(11, 19);
-        storedTimes.push(parsedTime);
+        storedTimes.push(data.published_at);
 
         if (isRefreshingLive == true)
         {
@@ -194,24 +186,6 @@
         document.getElementById("LiveToggleText").innerHTML = "Live Data: Off";
       }
     }
-	
-	// Changes Time Scale text to reflect current graph time scale
-	function ChangeTimeScaleToHour()
-	{
-		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for Past: Hour";
-	}
-	function ChangeTimeScaleToDay()
-	{
-		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for Past: Day";
-	}
-	function ChangeTimeScaleToWeek()
-	{
-		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for Past: Week";
-	}
-	function ChangeTimeScaleToMonth()
-	{
-		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for Past: Month";
-	}
   </script>
 </body>
 </html>

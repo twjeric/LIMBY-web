@@ -13,6 +13,11 @@
         toastr.warning(`<%=err%>`); 
       </script>
     <% } %>
+    <% if (msg){ %>
+      <script>
+        toastr.success(`<%=msg%>`); 
+      </script>
+    <% } %>
     <form action="/login" method="post">
       <div>
         Email: <input type="text" name="email">

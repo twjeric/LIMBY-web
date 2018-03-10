@@ -13,19 +13,39 @@ DB.prototype.connect = function(url, dbName) {
 			// Already connected
 			resolve();
 		} else {
-			var __this = _this;
-			MongoClient.connect(url)
-			.then(
-				function(client) {
-                    __this.db = client.db(dbName);
-                    console.log("Connected successfully to database");
-					resolve();
-				},
-				function(err) {
-					console.log("Error connecting to database: " + err.message);
-					reject(err);
-				}
-			)
+            var __this = _this;
+            if (process.env.LENV == 'azure') {
+                MongoClient.connect(url, {
+                    auth: {
+                        user: process.env.MONGO_USER,
+                        password: process.env.MONGO_PASSWORD,
+                    }
+                }).then(
+                    function(client) {
+                        __this.db = client.db(dbName);
+                        console.log("Connected successfully to database");
+                        resolve();
+                    },
+                    function(err) {
+                        console.log("Error connecting to database: " + err.message);
+                        reject(err);
+                    }
+                )
+            }
+            else {
+                MongoClient.connect(url)
+                .then(
+                    function(client) {
+                        __this.db = client.db(dbName);
+                        console.log("Connected successfully to database");
+                        resolve();
+                    },
+                    function(err) {
+                        console.log("Error connecting to database: " + err.message);
+                        reject(err);
+                    }
+                )
+            } 
 		}
 	})
 }

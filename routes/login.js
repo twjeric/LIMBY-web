@@ -14,7 +14,7 @@ router.get('/', auth, function (req, res, next) {
     }
     else {
         // No user logged in
-        res.render('login', { "err": null });
+        res.render('login', { "err": null, "msg": null });
     }
 })
 
@@ -36,11 +36,11 @@ router.post('/', async (req, res, next) => {
         else {
             // Register failed
             const err = await apiRes.text();
-            res.render('login', { "err": err });
+            res.render('login', { "err": err, "msg": null });
         }
 
     } catch (err) {
-        res.render('login', { "err": err });
+        res.render('login', { "err": err, "msg": null });
     }
 })
 
