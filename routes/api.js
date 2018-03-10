@@ -17,7 +17,7 @@ var apiAuth = require('../auth/apiAuth');
 // Register an user using Particle act
 router.post('/user', async (req, res, next) => {
   try {
-    await db.connect(config.mongodbUrl, config.dbName);
+    await db.connect(process.env.MONGO_URL || config.mongodbUrl, config.dbName);
     await db.find(config.usersCollection, { "email": req.body.email });
     // User existed
     res.status(400).send("User already existed");
@@ -35,7 +35,7 @@ router.post('/user', async (req, res, next) => {
       if (devices.length == 0) {
         res.status(400).status("No devices");
       }
-      let deviceId = devices[0]['id'];
+      var deviceId = devices[0]['id'];
       // Generate userid
       let userId = djb2(email);
       // Hash password
@@ -52,7 +52,7 @@ router.post('/user', async (req, res, next) => {
 // Authenticate user
 router.post('/auth', async (req, res, next) => {
   try {
-    await db.connect(config.mongodbUrl, config.dbName);
+    await db.connect(process.env.MONGO_URL || config.mongodbUrl, config.dbName);
     const user = await db.find(config.usersCollection, { "email": req.body.email });
     // Hash provided password to compare with hash in db
     if (bcrypt.compareSync(req.body.password, user[0].hash)) {
@@ -82,7 +82,7 @@ router.get('/past/:start/:end', apiAuth, async (req, res, next) => {
     res.status(400).send("Bad params");
   }
   try {
-    await db.connect(config.mongodbUrl, config.dbName);
+    await db.connect(process.env.MONGO_URL || config.mongodbUrl, config.dbName);
     const pastData = await db.find(config.dataCollection, { $and: [{"userid": req.uid}, {"time":{$gte: start}}, {"time":{$lte: end}}] }, 0);
     res.json(pastData);
   } catch (err) {
@@ -93,7 +93,7 @@ router.get('/past/:start/:end', apiAuth, async (req, res, next) => {
 // Get current data
 router.get('/stream', apiAuth, async (req, res, next) => {
   try {
-    await db.connect(config.mongodbUrl, config.dbName);
+    await db.connect(process.env.MONGO_URL || config.mongodbUrl, config.dbName);
     let now = new Date();
     db.stream(config.dataCollection, { $and: [{"userid": req.uid}, {"time":{$gte: now.getTime()}}] })
     .then(
@@ -118,7 +118,7 @@ router.get('/stream', apiAuth, async (req, res, next) => {
 // Start saving data from Particle cloud to db
 router.post('/start', apiAuth, async (req, res, next) => {
   try {
-    await db.connect(config.mongodbUrl, config.dbName);
+    await db.connect(process.env.MONGO_URL || config.mongodbUrl, config.dbName);
     const user = await db.find(config.usersCollection, { "userid": req.uid });
     saveStreamData(db, req.uid, user[0].did, user[0].at);
     res.send("Attempted to start saving data");

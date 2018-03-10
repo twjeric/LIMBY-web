@@ -29,7 +29,8 @@ router.post('/', async (req, res, next) => {
         });
         if (apiRes.status == 200) {
             // Register done
-            res.redirect('/events');
+            req.success = true;
+            res.render('login', { "err": null, "msg": "Registered successfully. Please log in :)" });
         }
         else {
             // Register failed
