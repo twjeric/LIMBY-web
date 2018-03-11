@@ -18,10 +18,10 @@
    <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToWeek()">Show Weight Past Week</button>
    <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToMonth()">Show Weight Past Month</button>
    <button type="button" class="btn btn-primary btn-lg" onclick="ToggleLive()">Toggle Live Refresh</button>
-   <p style = "font-size:18px"; id="LiveToggleText">Live Data: On</p>
+   <p style = "font-size:18px"; id="LiveToggleText">Live Data: Off</p>
    <p style = "font-size:18px"; id="TimeScaleText">Showing Weights for Past: Hour</p>
   <script>
-    var isRefreshingLive = true;
+    var isRefreshingLive = false;
     /* Particle Section
      *
      */
@@ -46,9 +46,19 @@
 	const MS_IN_A_WEEK = 604800000;
 	const MS_IN_A_MONTH = 2628000000;
 	
+	const HOUR = "hour";
+	const DAY = "day";
+	const WEEK = "week";
+	const MONTH = "month";
+	
 	const AXES_BUFFER = 1000;
 	
     const MAX_DATA_POINTS = 0;
+	
+	// How often 'live refresh' refreshes
+	const LIVE_REFRESH_RATE = 10000;
+	var timeScale = HOUR;
+    var dataLoop;
 
     // Data arrays
     /* displayedTimes and displayedWeights weights are hooked to the graph.
@@ -148,17 +158,36 @@
         }
       }
     });
-
 	
+    displayPastData(timeScale);
+
 	/* Requests previous weight data from server.
 	   1 Hour = 3,600,000 ms
 	   1 Day = 86,400,000 ms
 	   1 Week = 604,800,000 ms
 	   1 Month = 2,628,000,000 ms
 	*/ 	
+	function displayPastData(scale)
+	{
+	    var difference;
+	    switch(scale)
+		{
+		     case HOUR:
+			     difference = MS_IN_AN_HOUR;
+				 break;
+		     case DAY:
+			     difference = MS_IN_A_DAY;
+				 break;
+		     case WEEK:
+			     difference = MS_IN_A_WEEK;
+				 break;
+			 case MONTH:
+			     difference = MS_IN_A_MONTH;
+				 break;
+		}
 	let nowTime = new Date();
 	var nowMs = nowTime.getTime();
-	var pastDayMs = nowMs - MS_IN_A_WEEK;
+	var pastDayMs = nowMs - difference;
 	
 	var xhttp = new XMLHttpRequest();
 	var response;
@@ -169,6 +198,8 @@
     xhttp.addEventListener("readystatechange", processRequest, false);
     function processRequest(e) 
 	{
+	   displayedTimes.length = 0;
+	   displayedWeights.length = 0;
        if (xhttp.readyState == 4 && xhttp.status == 200) 
 	   {
            response = JSON.parse(xhttp.responseText);
@@ -202,22 +233,30 @@
 			   {
 			       amPm = "AM";
 			   }
-               var displayedDate = month+"/"+day+"  "+hour+":"+minute+":"+second+amPm;			   
-		       displayedTimes.push(displayedDate);
+               var displayedDate = month+"/"+day+"  "+hour+":"+minute+":"+second+amPm;	
+               displayedTimes.push(displayedDate);
+               console.log(displayedDate);			   
+		       //displayedTimes.push(displayedDate);
 			   
 			   // Weight display
-		       displayedWeights.push(response[r].value);
-		   }
-       }
-	   
-	   // Changes graph scale depending on currently displayed data
-	   weightChart.config.options.scales.yAxes[0].ticks.min = 
-	       Math.round((Math.min.apply(null, displayedWeights) - AXES_BUFFER)/1000)*1000;
-   	   weightChart.config.options.scales.yAxes[0].ticks.max = 
-	       Math.round((Math.max.apply(null, displayedWeights) + AXES_BUFFER)/1000)*1000;
+			   displayedWeights.push(response[r].value);
+			                  console.log(response[r].value);			   
 
-	   weightChart.update();
-    }
+		       //displayedWeights.push(response[r].value);
+		   }
+		   
+       }
+
+	      // Changes graph scale depending on currently displayed data
+	      weightChart.config.options.scales.yAxes[0].ticks.min = 
+	          Math.round((Math.min.apply(null, displayedWeights) - AXES_BUFFER)/1000)*1000;
+   	      weightChart.config.options.scales.yAxes[0].ticks.max = 
+	          Math.round((Math.max.apply(null, displayedWeights) + AXES_BUFFER)/1000)*1000;
+
+	      weightChart.update();
+       }
+	}
+	
     // Gets the weight readings periodically from Photon
     /*particle.getEventStream({ deviceId: '360057000351353530373132', auth: '5a495ca3a878380c969a64b0c0dcafbc8099888a' }).then(function(stream) {
       stream.on('event', function(data) {
@@ -264,10 +303,12 @@
       if (isRefreshingLive == true)
       {
         document.getElementById("LiveToggleText").innerHTML = "Live Data: On";
+        dataLoop = setInterval(function(){ displayPastData(timeScale); }, LIVE_REFRESH_RATE);
       }
       else
       {
         document.getElementById("LiveToggleText").innerHTML = "Live Data: Off";
+		clearInterval(dataLoop);
       }
     }
 	
@@ -275,18 +316,26 @@
 	function ChangeTimeScaleToHour()
 	{
 		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for Past: Hour";
+	    timeScale = HOUR;
+		displayPastData(timeScale);
 	}
 	function ChangeTimeScaleToDay()
 	{
 		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for Past: Day";
+	    timeScale = DAY;
+	    displayPastData(timeScale);
 	}
 	function ChangeTimeScaleToWeek()
 	{
 		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for Past: Week";
+	    timeScale = WEEK;
+		displayPastData(timeScale);
 	}
 	function ChangeTimeScaleToMonth()
 	{
 		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for Past: Month";
+	    timeScale = MONTH;
+	    displayPastData(timeScale);
 	}
   </script>
 </body>
