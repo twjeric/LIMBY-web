@@ -49,6 +49,7 @@
 		}
     );
 	
+	const MS_IN_A_MINUTE = 60000;
 	const MS_IN_AN_HOUR = 3600000;
 	const MS_IN_A_DAY = 86400000;
 	const MS_IN_A_WEEK = 604800000;
@@ -129,7 +130,7 @@
 		options:{
 			title:{
 				display:true,
-				text:'LIMBY Bird Monitor',
+				text:'LIMBY Smart Perch',
 				fontSize:25,
 				fontFamily: "Courier New"
 			},
@@ -203,7 +204,12 @@
 		
 		if (scale == "search")
 		{
-			nowMs = endUtc;
+			// Caps the end of the search range to now time
+			if (endUtc < nowMs)
+			{
+				nowMs = endUtc;
+			}
+			
 			pastMs = startUtc;
 		}
 		
@@ -252,7 +258,7 @@
 					}
 					var displayedDate = month+"/"+day+"  "+hour+":"+minute+":"+second+amPm;	
 					displayedTimes.push(displayedDate);
-					console.log(displayedDate);			   
+					//console.log(displayedDate);			   
 				   
 					// Weight display
 					displayedWeights.push(response[r].value);
@@ -388,6 +394,8 @@
 	function TimeScaleSearch()
 	{
 	    var startDate = document.getElementById("startDate").value;
+		var startObject = new Date(startDate);
+		
         var endDate = document.getElementById("endDate").value;	    
 		
 		var startYear = startDate.substring(0,4);
@@ -398,8 +406,12 @@
 		var endMonth = startDate.substring(5,7);
 		var endDay = startDate.substring(8,10);	
 		
-		startUtc = new Date(startDate).valueOf();
-		endUtc = new Date(endDate).valueOf() + MS_IN_A_DAY;
+		startUtc = new Date(startDate).valueOf() + 
+			(startObject.getTimezoneOffset() * MS_IN_A_MINUTE);
+		endUtc = new Date(endDate).valueOf() + MS_IN_A_DAY + 
+			(startObject.getTimezoneOffset() * MS_IN_A_MINUTE);
+		
+		//console.log(startUtc);
 		
 		if (startUtc > 0 && endUtc > 0)
 		{
