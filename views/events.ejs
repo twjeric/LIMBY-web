@@ -17,9 +17,18 @@
    <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToDay()">Show Weight Past Day</button>
    <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToWeek()">Show Weight Past Week</button>
    <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToMonth()">Show Weight Past Month</button>
+   
+   <form>
+     Show Weights from:
+     <input type="date" id="startDate">
+     to:
+     <input type="date" id="endDate">
+   </form>
+   <button type="button" class="btn btn-default btn-lg" onclick="TimeScaleSearch()">Search</button>
+   <p <br /></p>
    <button type="button" class="btn btn-primary btn-lg" onclick="ToggleLive()">Toggle Live Refresh</button>
    <p style = "font-size:18px"; id="LiveToggleText">Live Data: Off</p>
-   <p style = "font-size:18px"; id="TimeScaleText">Showing Weights for Past: Hour</p>
+   <p style = "font-size:18px"; id="TimeScaleText">Showing Weights for: Past Hour</p>
   <script>
     var isRefreshingLive = false;
     /* Particle Section
@@ -31,15 +40,14 @@
 
     // Particle Login
     particle.login({username: 'ko.wing.bird@gmail.com', password: 'qaz123QAZ'}).then(
-      function(data) {
-        token = data.body.access_token;
-        //window.alert(token)
-      },
-      function (err) {
-        console.log('Could not log in.', err);
-      }
+		function(data) {
+			token = data.body.access_token;
+			//window.alert(token)
+		},
+		function (err) {
+			console.log('Could not log in.', err);
+		}
     );
-
 	
 	const MS_IN_AN_HOUR = 3600000;
 	const MS_IN_A_DAY = 86400000;
@@ -50,6 +58,7 @@
 	const DAY = "day";
 	const WEEK = "week";
 	const MONTH = "month";
+	const SEARCH = "search";
 	
 	const AXES_BUFFER = 1000;
 	
@@ -59,6 +68,9 @@
 	const LIVE_REFRESH_RATE = 10000;
 	var timeScale = HOUR;
     var dataLoop;
+	
+	var startUtc;
+	var endUtc;
 
     // Data arrays
     /* displayedTimes and displayedWeights weights are hooked to the graph.
@@ -77,11 +89,11 @@
     // Initialize data arrays
     for (i = 0; i < MAX_DATA_POINTS; i++)
     {
-      displayedWeights.push(0);
-      displayedTimes.push("");
+		displayedWeights.push(0);
+		displayedTimes.push("");
 
-      storedTimes.push(0);
-      storedWeights.push("");
+		storedTimes.push(0);
+		storedWeights.push("");
     }
    
     /* Chart Code
@@ -94,69 +106,69 @@
     Chart.defaults.global.defaultFontSize = 18;
 
     var weightChart = new Chart(myChart, {
-      // Graph Type
-      type: 'line', // Types: bar, horizontalBar, pie, line, doughnut, radar, polarArea
+		// Graph Type
+		type: 'line', // Types: bar, horizontalBar, pie, line, doughnut, radar, polarArea
 
-      // Data Displayed
-      data:{
-        // x axis names
-        labels:displayedTimes, // Array type
-        datasets:[{
-          label:'Weight',
-          // y axis values for each x axis label
-          data:displayedWeights,
-          backgroundColor:'rgba(66, 134, 244, .3)', // Color of line data, light blue
-          borderWidth:1, // Width of each weight node
-          borderColor:'#777',
-          hoverBorderWidth:3,
-          hoverBorderColor:'#000'
-        }]
-      },
+		// Data Displayed
+		data:{
+			// x axis names
+			labels:displayedTimes, // Array type
+			datasets:[{
+				label:'Weight',
+				// y axis values for each x axis label
+				data:displayedWeights,
+				backgroundColor:'rgba(66, 134, 244, .3)', // Color of line data, light blue
+				borderWidth:1, // Width of each weight node
+				borderColor:'#777',
+				hoverBorderWidth:3,
+				hoverBorderColor:'#000'
+			}]
+		},
 
-      // Graph Auxillary Options - title, legend, etc.
-      options:{
-        title:{
-          display:true,
-          text:'Bird Weight in Grams',
-          fontSize:25,
-          fontFamily: "Courier New"
-        },
-        legend:{
-          //position:'right',
-          display:false,
-          labels:{
-            fontColor:'#000'
-          }
-        },
-        scales: {
-                xAxes: [{
-                        display: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Time'
-                        },
-                        fontFamily: 'Courier New'
-                    }],
-                yAxes: [{
-                        display: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Weight'
-                        },
-                        fontFamily: 'Courier New',
-                        ticks: {
-                            beginAtZero: true,
-                            steps: 40,
-                            stepSize: 1000,
-                            min: -60000,
-                            max: 60000
-                        }
-                    }]
-            },
-        layout:{
+		// Graph Auxillary Options - title, legend, etc.
+		options:{
+			title:{
+				display:true,
+				text:'LIMBY Bird Monitor',
+				fontSize:25,
+				fontFamily: "Courier New"
+			},
+			legend:{
+				//position:'right',
+				display:false,
+				labels:{
+					fontColor:'#000'
+				}
+			},
+			scales: {
+				xAxes: [{
+					display: true,
+					scaleLabel: {
+						display: true,
+						labelString: 'Time'
+					},
+					fontFamily: 'Courier New'
+				}],
+				yAxes: [{
+					display: true,
+					scaleLabel: {
+						display: true,
+						labelString: 'Weight in Grams'
+					},
+					fontFamily: 'Courier New',
+					ticks: {
+						beginAtZero: true,
+						steps: 40,
+						stepSize: 1000,
+						min: -60000,
+						max: 60000
+					}
+				}]
+			},
+			layout:{
 
+			}
         }
-      }
     });
 	
     displayPastData(timeScale);
@@ -172,89 +184,89 @@
 	    var difference;
 	    switch(scale)
 		{
-		     case HOUR:
-			     difference = MS_IN_AN_HOUR;
-				 break;
-		     case DAY:
-			     difference = MS_IN_A_DAY;
-				 break;
-		     case WEEK:
-			     difference = MS_IN_A_WEEK;
-				 break;
-			 case MONTH:
-			     difference = MS_IN_A_MONTH;
-				 break;
+		    case HOUR:
+			    difference = MS_IN_AN_HOUR;
+				break;
+		    case DAY:
+			    difference = MS_IN_A_DAY;
+				break;
+		    case WEEK:
+			    difference = MS_IN_A_WEEK;
+				break;
+			case MONTH:
+			    difference = MS_IN_A_MONTH;
+				break;
 		}
-	let nowTime = new Date();
-	var nowMs = nowTime.getTime();
-	var pastDayMs = nowMs - difference;
-	
-	var xhttp = new XMLHttpRequest();
-	var response;
-	
-    xhttp.open("GET", "http://localhost:3000/api/past/"+pastDayMs.toString()+ "/" +nowMs.toString(), true);
-    //xhttp.setRequestHeader("Content-type", "application/json");
-    xhttp.send();
-    xhttp.addEventListener("readystatechange", processRequest, false);
-    function processRequest(e) 
-	{
-	   displayedTimes.length = 0;
-	   displayedWeights.length = 0;
-       if (xhttp.readyState == 4 && xhttp.status == 200) 
-	   {
-           response = JSON.parse(xhttp.responseText);
-           console.log(response[0].time);
+		let nowTime = new Date();
+		var nowMs = nowTime.getTime();
+		var pastMs = nowMs - difference;
+		
+		if (scale == "search")
+		{
+			nowMs = endUtc;
+			pastMs = startUtc;
+		}
+		
+		var xhttp = new XMLHttpRequest();
+		var response;
+		
+		xhttp.open("GET", "http://localhost:3000/api/past/"+pastMs.toString()+ "/" +nowMs.toString(), true);
+		//xhttp.setRequestHeader("Content-type", "application/json");
+		xhttp.send();
+		xhttp.addEventListener("readystatechange", processRequest, false);
+		function processRequest(e) 
+		{
+			displayedTimes.length = 0;
+			displayedWeights.length = 0;
+			if (xhttp.readyState == 4 && xhttp.status == 200) 
+			{
+				response = JSON.parse(xhttp.responseText);				
 
-           // response structure: _id, userid, time, value
-		   for (var r in response)
-		   {
-		       // Time display
-			   var date = new Date(response[r].time);
-               var month = date.getMonth();
-               var day = date.getDate();
-               var hour = date.getHours();
-               var minute = date.getMinutes(); 
-               if (minute < 10)
-               {
-			       minute = "0"+minute;
-			   }	
-			   var second = date.getSeconds();			   
-               if (second < 10)
-               {
-			       second = "0"+second;
-			   }				  
-               var amPm;
-               if (hour >= 12)
-               {
-			       hour = 12 - (24 - hour);
-			       amPm = "PM";
-			   }			   
-			   else
-			   {
-			       amPm = "AM";
-			   }
-               var displayedDate = month+"/"+day+"  "+hour+":"+minute+":"+second+amPm;	
-               displayedTimes.push(displayedDate);
-               console.log(displayedDate);			   
-		       //displayedTimes.push(displayedDate);
-			   
-			   // Weight display
-			   displayedWeights.push(response[r].value);
-			                  console.log(response[r].value);			   
+				// response structure: _id, userid, time, value
+				for (var r in response)
+				{
+					// Time display
+					var date = new Date(response[r].time);
+					var month = date.getMonth() + 1;
+					var day = date.getDate();
+					var hour = date.getHours();
+					var minute = date.getMinutes(); 
+					if (minute < 10)
+					{
+						minute = "0"+minute;
+					}	
+					var second = date.getSeconds();			   
+					if (second < 10)
+					{
+						second = "0"+second;
+					}				  
+					var amPm;
+					if (hour >= 12)
+					{
+						hour = 12 - (24 - hour);
+						amPm = "PM";
+					}			   
+					else
+					{
+						amPm = "AM";
+					}
+					var displayedDate = month+"/"+day+"  "+hour+":"+minute+":"+second+amPm;	
+					displayedTimes.push(displayedDate);
+					console.log(displayedDate);			   
+				   
+					// Weight display
+					displayedWeights.push(response[r].value);
+				}
+			}
 
-		       //displayedWeights.push(response[r].value);
-		   }
-		   
-       }
+			// Changes graph scale depending on currently displayed data
+			weightChart.config.options.scales.yAxes[0].ticks.min = 
+				Math.round((Math.min.apply(null, displayedWeights) - AXES_BUFFER)/1000)*1000;
+			weightChart.config.options.scales.yAxes[0].ticks.max = 
+				Math.round((Math.max.apply(null, displayedWeights) + AXES_BUFFER)/1000)*1000;
 
-	      // Changes graph scale depending on currently displayed data
-	      weightChart.config.options.scales.yAxes[0].ticks.min = 
-	          Math.round((Math.min.apply(null, displayedWeights) - AXES_BUFFER)/1000)*1000;
-   	      weightChart.config.options.scales.yAxes[0].ticks.max = 
-	          Math.round((Math.max.apply(null, displayedWeights) + AXES_BUFFER)/1000)*1000;
-
-	      weightChart.update();
-       }
+			weightChart.update();
+		}
 	}
 	
     // Gets the weight readings periodically from Photon
@@ -296,46 +308,107 @@
     // Live Toggle Button
     function ToggleLive()
     {
-      isRefreshingLive = !isRefreshingLive;
-      console.log(isRefreshingLive);
+		isRefreshingLive = !isRefreshingLive;
+		console.log(isRefreshingLive);
 
-      // Changes Live Data text accordingly
-      if (isRefreshingLive == true)
-      {
-        document.getElementById("LiveToggleText").innerHTML = "Live Data: On";
-        dataLoop = setInterval(function(){ displayPastData(timeScale); }, LIVE_REFRESH_RATE);
-      }
-      else
-      {
-        document.getElementById("LiveToggleText").innerHTML = "Live Data: Off";
-		clearInterval(dataLoop);
-      }
+		// Changes Live Data text accordingly
+		if(timeScale == SEARCH)
+		{
+			return;
+		}
+		if (isRefreshingLive == true)
+		{
+			document.getElementById("LiveToggleText").innerHTML = "Live Data: On";
+			dataLoop = setInterval(function(){ displayPastData(timeScale); }, LIVE_REFRESH_RATE);
+		}
+		else
+		{
+			document.getElementById("LiveToggleText").innerHTML = "Live Data: Off";
+			clearInterval(dataLoop);
+		}
     }
 	
 	// Changes Time Scale text to reflect current graph time scale
 	function ChangeTimeScaleToHour()
 	{
-		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for Past: Hour";
+		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for: Past Hour";
+		if (isRefreshingLive == true && timeScale != SEARCH)
+		{
+			document.getElementById("LiveToggleText").innerHTML = "Live Data: On";
+		}
+		else
+		{
+			document.getElementById("LiveToggleText").innerHTML = "Live Data: Off";
+		}
 	    timeScale = HOUR;
 		displayPastData(timeScale);
 	}
 	function ChangeTimeScaleToDay()
 	{
-		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for Past: Day";
-	    timeScale = DAY;
+		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for: Past Day";
+	    if (isRefreshingLive == true && timeScale != SEARCH)
+		{
+			document.getElementById("LiveToggleText").innerHTML = "Live Data: On";
+		}
+		else
+		{
+			document.getElementById("LiveToggleText").innerHTML = "Live Data: Off";
+		}
+		timeScale = DAY;
 	    displayPastData(timeScale);
 	}
 	function ChangeTimeScaleToWeek()
 	{
-		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for Past: Week";
-	    timeScale = WEEK;
+		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for: Past Week";
+	    if (isRefreshingLive == true && timeScale != SEARCH)
+		{
+			document.getElementById("LiveToggleText").innerHTML = "Live Data: On";
+		}
+		else
+		{
+			document.getElementById("LiveToggleText").innerHTML = "Live Data: Off";
+		}
+		timeScale = WEEK;
 		displayPastData(timeScale);
 	}
 	function ChangeTimeScaleToMonth()
 	{
-		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for Past: Month";
-	    timeScale = MONTH;
+		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for: Past Month";
+	    if (isRefreshingLive == true && timeScale != SEARCH)
+		{
+			document.getElementById("LiveToggleText").innerHTML = "Live Data: On";
+		}
+		else
+		{
+			document.getElementById("LiveToggleText").innerHTML = "Live Data: Off";
+		}
+		timeScale = MONTH;
 	    displayPastData(timeScale);
+	}
+	function TimeScaleSearch()
+	{
+	    var startDate = document.getElementById("startDate").value;
+        var endDate = document.getElementById("endDate").value;	    
+		
+		var startYear = startDate.substring(0,4);
+		var startMonth = startDate.substring(5,7);
+		var startDay = startDate.substring(8,10);
+		
+		var endYear = startDate.substring(0,4);
+		var endMonth = startDate.substring(5,7);
+		var endDay = startDate.substring(8,10);	
+		
+		startUtc = new Date(startDate).valueOf();
+		endUtc = new Date(endDate).valueOf() + MS_IN_A_DAY;
+		
+		if (startUtc > 0 && endUtc > 0)
+		{
+			timeScale = SEARCH;
+			displayPastData(timeScale);
+			
+			document.getElementById("LiveToggleText").innerHTML = "Live Data: Not Available with Search";
+			document.getElementById("TimeScaleText").innerHTML = "Showing Weights from " + startDate + " to " + endDate;
+		}	
 	}
   </script>
 </body>
