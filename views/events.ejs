@@ -29,6 +29,8 @@
    <button type="button" class="btn btn-primary btn-lg" onclick="ToggleLive()">Toggle Live Refresh</button>
    <p style = "font-size:18px"; id="LiveToggleText">Live Data: Off</p>
    <p style = "font-size:18px"; id="TimeScaleText">Showing Weights for: Past Hour</p>
+   <a id="myLink" title="Click to do something"
+ href="#" onclick="CreateCSV();return false;">Download this data</a>
   <script>
     var isRefreshingLive = false;
     /* Particle Section
@@ -63,6 +65,9 @@
 	
 	const AXES_BUFFER = 1000;
 	
+	const EPOCH_CORRECTION_MONTH = 1;
+	const EPOCH_CORRECTION_YEAR = 1900;
+	
     const MAX_DATA_POINTS = 0;
 	
 	// How often 'live refresh' refreshes
@@ -79,6 +84,8 @@
     */
     var displayedTimes = []; // Time at which weight was recorded
     var displayedWeights = []; // Recorded weights
+	
+	var csvTimes = [];
 
     // These are the buffers that will hold the perch data before they are displayed to the graph
     var storedTimes = [];
@@ -223,6 +230,7 @@
 		function processRequest(e) 
 		{
 			displayedTimes.length = 0;
+			csvTimes.length = 0;
 			displayedWeights.length = 0;
 			if (xhttp.readyState == 4 && xhttp.status == 200) 
 			{
@@ -231,34 +239,49 @@
 				// response structure: _id, userid, time, value
 				for (var r in response)
 				{
+					var amPm;
+					
 					// Time display
 					var date = new Date(response[r].time);
-					var month = date.getMonth() + 1;
+					var year = date.getYear() + EPOCH_CORRECTION_YEAR;
+					var month = date.getMonth() + EPOCH_CORRECTION_MONTH;
 					var day = date.getDate();
 					var hour = date.getHours();
 					var minute = date.getMinutes(); 
+					
 					if (minute < 10)
 					{
 						minute = "0"+minute;
 					}	
-					var second = date.getSeconds();			   
+					
+					var second = date.getSeconds();		
 					if (second < 10)
 					{
 						second = "0"+second;
-					}				  
-					var amPm;
-					if (hour >= 12)
+					}	
+					
+					if (hour == 12)
+					{
+						amPm = "PM";
+					}
+					else if (hour > 12)
 					{
 						hour = 12 - (24 - hour);
 						amPm = "PM";
 					}			   
+					else if (hour == 0)
+					{
+						hour = 12;
+						amPm = "AM";
+					}
 					else
 					{
 						amPm = "AM";
 					}
-					var displayedDate = month+"/"+day+"  "+hour+":"+minute+":"+second+amPm;	
+					var displayedDate = month+"/"+day+"  "+hour+":"+minute+":"+second+amPm;
+					var csvDate = month+"."+day+"."+year+", "+hour+":"+minute+":"+second+amPm;
 					displayedTimes.push(displayedDate);
-					//console.log(displayedDate);			   
+					csvTimes.push(csvDate);
 				   
 					// Weight display
 					displayedWeights.push(response[r].value);
@@ -421,6 +444,33 @@
 			document.getElementById("LiveToggleText").innerHTML = "Live Data: Not Available with Search";
 			document.getElementById("TimeScaleText").innerHTML = "Showing Weights from " + startDate + " to " + endDate;
 		}	
+	}
+	
+	// Creates CSV from currently displayed time and weight data and prompts download on client
+	function CreateCSV()
+	{
+		var csvRows = [];
+
+		csvRows.push("Date, Time, Weight in Grams");
+		
+		// Combines times and weights
+		for(var i = 0; i < csvTimes.length; ++i)
+		{
+			csvRows.push(csvTimes[i] + ", " + displayedWeights[i]);
+		}		
+		
+		// Puts a new row after every vector element
+		var csvString = Array.prototype.join.call(csvRows, "\n");
+		csvRows.push(csvString);
+
+		// Creates CSV and prompts download
+		var a = document.createElement('a');
+		a.href = 'data:attachment/csv,' +  encodeURIComponent(csvString);
+		a.target = '_blank';
+		a.download = 'birdWeights.csv';
+
+		document.body.appendChild(a);
+		a.click();
 	}
   </script>
 </body>
