@@ -137,16 +137,25 @@ router.post('/start', apiAuth, async (req, res, next) => {
   try {
     await db.connect(process.env.MONGO_URL || config.mongodbUrl, config.dbName);
     const user = await db.find(config.usersCollection, { "userid": req.uid });
-    const latest = await db.findLatest(config.dataCollection);
-    let now = new Date();
-    // TODO: Catch the case of first 2 requests sent < publishing interval
-    // TODO: Allow different publishing interval instead of fixed
-    if ((now.getTime() - latest.time) <= config.publishInterval) {
-      res.status(400).send("Already started saving data");
-    }
-    else {
-      saveStreamData(db, req.uid, user[0].did, user[0].at);
-      res.send("Attempted to start saving data");
+    try {
+      const latest = await db.findLatest(config.dataCollection, { "userid": req.uid });
+      let now = new Date();
+      // TODO: Catch the case of first 2 requests sent < publishing interval
+      // TODO: Allow different publishing interval instead of fixed
+      if ((now.getTime() - latest.time) <= config.publishInterval) {
+        res.status(400).send("Already started saving data");
+      }
+      else {
+        saveStreamData(db, req.uid, user[0].did, user[0].at);
+        res.send("Attempted to start saving data");
+      }
+    } catch (err) {
+      if (err instanceof (enfError)) {
+        saveStreamData(db, req.uid, user[0].did, user[0].at);
+        res.send("Attempted to start saving data");
+      } else {
+        res.status(500).send("Error starting saving data");
+      }  
     }
   } catch (err) {
     if (err instanceof (enfError)) {
