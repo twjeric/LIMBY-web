@@ -7,9 +7,11 @@ var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
 var login = require('./routes/login');
+var logout = require('./routes/logout');
 var register = require('./routes/register');
+var device = require('./routes/device');
 var events = require('./routes/events');
-var api = require('./routes/api')
+var api = require('./routes/api');
 
 var app = express();
 
@@ -27,7 +29,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
 app.use('/login', login);
+app.use('/logout', logout);
 app.use('/register', register);
+app.use('/device', device);
 app.use('/events', events);
 app.use('/api', api);
 
