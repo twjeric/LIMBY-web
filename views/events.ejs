@@ -320,12 +320,10 @@
 		xhttp.addEventListener("readystatechange", processRequest, false);
 		function processRequest(e) 
 		{
-			var list = xhttp.responseText.replace(/\[/g, '').replace(/\},{/g, '};{').split(';');
 			if (xhttp.readyState == 3 && xhttp.status == 200) 
 			{
-				var list = xhttp.responseText.replace(/\[/g, '').replace(/\},{/g, '};{').split(';');
-				var latest = list[(list.length)-1+length];
-				length = latest.length;
+				var latestJson = JSON.parse(xhttp.responseText + ']');
+				var { [Object.keys(latestJson).pop()]: latest } = latestJson;
 				console.log(latest);
 			}
 		}
