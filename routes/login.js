@@ -30,7 +30,15 @@ router.post('/', async (req, res, next) => {
         if (apiRes.status == 200) {
             // Register done
             const tokenJson = await apiRes.json();
-            res.cookie(config.jwtCookie, tokenJson['token']);
+            if (req.body.remember == 'on') { // "Remember me" is selected, set 1-month cookie
+                res.cookie(config.jwtCookie, tokenJson['token'], {
+                    expires: new Date(Date.now() + 30*24*60*60*1000),
+                    httpOnly: true
+                });
+            } 
+            else { // Set session cookie
+                res.cookie(config.jwtCookie, tokenJson['token']);
+            }
             res.redirect('/events');
         }
         else {

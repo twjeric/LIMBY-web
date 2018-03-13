@@ -79,6 +79,35 @@ DB.prototype.find = function(collection, query, limit=1) {
     })
 }
 
+// Find the latest entry
+DB.prototype.findLatest = function(collection) {
+    var _this = this;
+    return new Promise(function (resolve, reject) {
+        _this.db.collection(collection, function(err, col) {
+            if (err) {
+                console.log("Error accessing collection: " + err.message);
+                reject(err);
+            }
+            else {
+                col.find().sort({"time":-1}).limit(1).toArray(function(err, foundArr) {
+                    if (err) {
+                        console.log("Error reading cursor: " + err.message);
+                        reject(err);
+                    }
+                    // No entry found
+                    else if (typeof(foundArr[0]) == 'undefined') {
+                        reject(new enfError);
+                    }
+                    // At least one entry found
+                    else {
+                        resolve(foundArr[0]);
+                    }
+                })
+            }
+        })
+    })
+}
+
 // Get result for query as stream
 DB.prototype.stream = function(collection, query) {
     var _this = this;
