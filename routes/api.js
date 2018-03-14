@@ -34,10 +34,10 @@ router.post('/user', async (req, res, next) => {
       if (devices.length == 0) {
         res.status(400).status("No devices");
       }
-      var deviceId = devices[0]['id'];
+      let deviceId = devices[0]['id'];
       // Generate userid, password hash then save user to db
       let userId = djb2(email);
-      var hash = bcrypt.hashSync(password, config.salt);
+      let hash = bcrypt.hashSync(password, config.salt);
       await db.insertOne(config.usersCollection, { "userid": userId, "email": email, "hash": hash, "did": deviceId, "at": at });
       res.status(200).send("Registered");
     } catch (err) {
@@ -121,7 +121,7 @@ router.get('/stream', apiAuth, async (req, res, next) => {
         stream.on('end', function() {
           res.end();
         });
-        stream.pipe(JSONStream.stringify()).pipe(res, {end:false});
+        stream.pipe(JSONStream.stringify()).pipe(res.type('json'), {end:false});
       },
       function(err) {
         res.status(500).send("Error getting data stream");
@@ -142,7 +142,7 @@ router.post('/start', apiAuth, async (req, res, next) => {
       let now = new Date();
       // TODO: Catch the case of first 2 requests sent < publishing interval
       // TODO: Allow different publishing interval instead of fixed
-      if ((now.getTime() - latest.time) <= config.publishInterval) {
+      if ((now.getTime() - latest.time) < config.publishInterval) {
         res.status(400).send("Already started saving data");
       }
       else {
@@ -201,7 +201,7 @@ function saveStreamData(connectedDB, userId, deviceId, accessToken) {
 
 // Hash string to int (create userid)
 function djb2(str) {
-  var hash = 5381;
+  let hash = 5381;
   for (i = 0; i < str.length; i++) {
       char = str.charCodeAt(i);
       hash = ((hash << 5) + hash) + char;
