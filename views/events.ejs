@@ -29,8 +29,8 @@
    <button type="button" class="btn btn-primary btn-lg" onclick="ToggleLive()">Toggle Live Refresh</button>
    <p style = "font-size:18px"; id="LiveToggleText">Live Data: Off</p>
    <p style = "font-size:18px"; id="TimeScaleText">Showing Weights for: Past Hour</p>
-   <a id="myLink" title="Click to do something"
- href="#" onclick="CreateCSV();return false;">Download this data</a>
+   <a style = "font-size:14px";id="myLink" title="Download" href="#" onclick="CreateCSV();return false;">Download this data</a>
+   <br><br />
   <script>
     var isRefreshingLive = false;
     /* Particle Section
@@ -357,7 +357,7 @@
 		}
     }
 	
-	// Changes Time Scale text to reflect current graph time scale
+	// Changes Time Scale text to reflect current graph time scale - Hour
 	function ChangeTimeScaleToHour()
 	{
 		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for: Past Hour";
@@ -371,7 +371,7 @@
 		}
 	    timeScale = HOUR;
 		displayPastData(timeScale);
-	}
+	}	
 	function ChangeTimeScaleToDay()
 	{
 		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for: Past Day";
@@ -414,6 +414,8 @@
 		timeScale = MONTH;
 	    displayPastData(timeScale);
 	}
+	
+	// Takes in a search start day and a search end day and calls the data fetch method
 	function TimeScaleSearch()
 	{
 	    var startDate = document.getElementById("startDate").value;
