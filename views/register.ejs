@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>Register</title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel='stylesheet' href='/stylesheets/login.css' />
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
@@ -13,20 +13,26 @@
         toastr.warning(`<%=err%>`); 
       </script>
     <% } %>
-    <form action="/register" method="post">
-      <div>
-        Email (Particle account for your perch): <input type="text" name="email">
-      </div>
+	<div class="title"><h1>Smart Perch Register</h1></div>
+	
+	<div class="container">
+		<div class="left"></div>
+		<div class="right">
+			<div class="formBox">
+				<form action="/register" method="post">
+				  <div>
+					<b>Email</b> <input type="text" name="email" placeholder="Particle account for your perch">
+				  </div>
 
-      <div>
-        Password (Particle account for your perch): <input type="password" name="password">
-      </div>
-
-      <button type="submit">Register</button>
-    </form>
-
-    <form action="/login" method="get">
-      <button type="submit">Login</button>
-    </form>
+				  <div>
+					<b>Password</b> <input type="password" name="password" placeholder="Particle account for your perch">
+				  </div>
+				  <button type="submit">Register</button>
+				</form>
+				<div><p>Already have an account? <a href="/login">Login</a><p></div>
+			</div>
+		</div>
+	</div>
+	
   </body>
 </html>

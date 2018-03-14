@@ -2,11 +2,12 @@
 <html>
   <head>
     <title>Login</title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel='stylesheet' href='/stylesheets/login.css' />
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
   </head>
+  
   <body>
     <% if (err){ %>
       <script>
@@ -18,20 +19,28 @@
         toastr.success(`<%=msg%>`); 
       </script>
     <% } %>
-    <form action="/login" method="post">
-      <div>
-        Email: <input type="text" name="email">
-      </div>
+	<div class="title"><h1>Smart Perch Login</h1></div>
+	
+	<div class="container">
+		<div class="left"></div>
+		<div class="right">
+			<div class="formBox">
+				<form action="/login" method="post">
+				  <div>
+					<b>Email:</b> <input type="text" name="email" placeholder="Email">
+				  </div>
 
-      <div>
-        Password: <input type="password" name="password">
-      </div>
+				  <div>
+					<b>Password:</b> <input type="password" name="password" placeholder="******">
+				  </div>
 
-      <button type="submit">Login</button>
-    </form>
-
-    <form action="/register" method="get">
-      <button type="submit">Register</button>
-    </form>
+				  <button type="submit">Login</button>
+				</form>
+				<div><p>Don't have an account? <a href="/register">Sigh up</a><p></div>
+			</div>
+		</div>
+	</div>
+	
+	
   </body>
 </html>

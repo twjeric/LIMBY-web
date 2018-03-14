@@ -1,0 +1,98 @@
+body
+{
+	margin: 0;
+	padding: 0;
+
+	font-family: sans-serif;
+}
+
+.title
+{
+	text-align:center;
+	padding: 50px 0 20px;
+}
+
+.tile h1
+{
+	margin: 0;
+	padding: 0;
+	color: #262626;
+	text-transform: uppercase;
+	font-size: 36px;
+}
+.container
+{
+	width: 50%;
+	height: 400px;
+	background: #fff;
+	margin: 0 auto;
+	border: 2px solid #fff
+	box-shadow: 0 15px 40px rgba(0,0,0,.5);
+}
+
+.container .left
+{
+	float: left;
+	width: 50%;
+	height: 400px;
+	background: url(bird.jpg);
+	background-size: cover;
+	box-sizing: border-box;
+}
+
+.container .right
+{
+	float: right;
+	width: 50%;
+	height: 400px;
+	box-sizing: border=box;
+}
+
+.formBox
+{
+	width: 100%;
+	padding: 80px 40px;
+	box-sizing: border-box;
+	height: 400px;
+	background: #fff;
+}
+
+.formBox p
+{
+	margin: 0;
+	padding: 0;
+	font-weight: bold;
+}
+
+.formBox input
+{
+	margin-bottom: 20px;
+	width: 100%;
+}
+
+.formBox input[type="text"], 
+.formBox input[type="Password"]
+{
+	border: none;
+	border-bottom: 2px solid #a6af13;
+	outline: none;
+	height: 40px;
+}
+
+.formBox button[type="submit"]
+{
+	margin-bottom: 20px;
+	width: 100%;
+	border: none;
+	outline: none;
+	height: 40px;
+	color: #fff;
+	background: #42465e;
+	cursor: pointer;
+}
+
+.formBox a{
+	color: #0000ff;
+	font-size: 16px;
+	font-weight: bold;
+}
