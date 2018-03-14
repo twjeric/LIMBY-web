@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Device</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+  </head>
+  <body>
+    <div class="navbar">
+        <a href="/">Home</a>
+        <div class="profile dropdown">
+            <img src="https://data.whicdn.com/images/45841608/original.jpg" class="avatar dropbtn">
+            <div class="drop-content">
+                <a href="/device">Device info</a>
+                <a href="/logout">Log out</a>
+            </div>
+        </div>
+    </div>
+    <div class="device-info">
+        <% if (err){ %>
+            <script>
+                toastr.warning(`<%=err%>`); 
+            </script>
+        <% } %>
+        <ul>
+            <% for (let kind in info) { %>
+                <li><%= kind %>: <%= info[kind] %></li>
+            <% } %>
+        </ul>
+  </body>
+</html>

@@ -9,5 +9,6 @@
     "dataCollection": "Data",
     "jwtCookie": "limby-jwt",
     "salt": 10,
-    "streamTimeOut": 300000
+    "streamTimeOut": 300000,
+    "publishInterval": 10000
 }

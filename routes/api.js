@@ -26,7 +26,6 @@ router.post('/user', async (req, res, next) => {
       let email = req.body.email;
       let password = req.body.password;
       const data = await particle.login({ username: email, password: password });
-      //// Good Particle act, register this user
       // Retrive device id
       // TODO: choose a specific device if there are multiple
       let at = data.body.access_token;
@@ -36,11 +35,9 @@ router.post('/user', async (req, res, next) => {
         res.status(400).status("No devices");
       }
       var deviceId = devices[0]['id'];
-      // Generate userid
+      // Generate userid, password hash then save user to db
       let userId = djb2(email);
-      // Hash password
       var hash = bcrypt.hashSync(password, config.salt);
-      // Save user to db
       await db.insertOne(config.usersCollection, { "userid": userId, "email": email, "hash": hash, "did": deviceId, "at": at });
       res.status(200).send("Registered");
     } catch (err) {
@@ -56,7 +53,6 @@ router.post('/auth', async (req, res, next) => {
     const user = await db.find(config.usersCollection, { "email": req.body.email });
     // Hash provided password to compare with hash in db
     if (bcrypt.compareSync(req.body.password, user[0].hash)) {
-      // Ok, set cookie
       const token = await jwt.sign({ uid: user[0].userid }, config.secret);
       res.cookie(config.jwtCookie, token);
       res.json({'token': token});
@@ -70,6 +66,27 @@ router.post('/auth', async (req, res, next) => {
     } else {
       res.status(400).send("Error authenticating user"); 
     }
+  }
+})
+
+// Get device info
+router.get('/device', apiAuth, async (req, res, next) => {
+  try {
+    await db.connect(process.env.MONGO_URL || config.mongodbUrl, config.dbName);
+    const user = await db.find(config.usersCollection, { "userid": req.uid });
+    const deviceRes = await fetch(config.particleEndPointUrl + config.particleDevicesApi + '/' + user[0].did + '?access_token=' + user[0].at, {method: 'GET'});
+    const device = await deviceRes.json();
+    res.json({
+      'name': device.name,
+      'id': device.id,
+      'status': device.status,
+      'online': device.connected,
+      'last-heard': device.last_heard,
+      'last-ip-address': device.last_ip_address,
+      'system-firmware-version': device.system_firmware_version
+    });
+  } catch (err) {
+    res.status(500).send("Error getting device detail");
   }
 })
 
@@ -120,8 +137,26 @@ router.post('/start', apiAuth, async (req, res, next) => {
   try {
     await db.connect(process.env.MONGO_URL || config.mongodbUrl, config.dbName);
     const user = await db.find(config.usersCollection, { "userid": req.uid });
-    saveStreamData(db, req.uid, user[0].did, user[0].at);
-    res.send("Attempted to start saving data");
+    try {
+      const latest = await db.findLatest(config.dataCollection, { "userid": req.uid });
+      let now = new Date();
+      // TODO: Catch the case of first 2 requests sent < publishing interval
+      // TODO: Allow different publishing interval instead of fixed
+      if ((now.getTime() - latest.time) <= config.publishInterval) {
+        res.status(400).send("Already started saving data");
+      }
+      else {
+        saveStreamData(db, req.uid, user[0].did, user[0].at);
+        res.send("Attempted to start saving data");
+      }
+    } catch (err) {
+      if (err instanceof (enfError)) {
+        saveStreamData(db, req.uid, user[0].did, user[0].at);
+        res.send("Attempted to start saving data");
+      } else {
+        res.status(500).send("Error starting saving data");
+      }  
+    }
   } catch (err) {
     if (err instanceof (enfError)) {
       res.status(400).send("User not exist");
@@ -133,7 +168,6 @@ router.post('/start', apiAuth, async (req, res, next) => {
 
 // Used by api/start
 function saveStreamData(connectedDB, userId, deviceId, accessToken) {
-  let temp = 0;
   particle.getEventStream({ deviceId: deviceId, auth: accessToken })
   .then(
     function(stream) {
@@ -142,10 +176,10 @@ function saveStreamData(connectedDB, userId, deviceId, accessToken) {
         console.log("No input from stream for " + userId + " for " + config.streamTimeOut + " ms. Stop listening...");
         stream.removeAllListeners();
       }
+      timeout = setTimeout(stopListening, config.streamTimeOut);
       stream.on('event', function(data) {
-        // Stream has input, clear then set timeout
+        // Stream has input, clear timeout
         clearTimeout(timeout);
-        timeout = setTimeout(stopListening, config.streamTimeOut);
         // Parse weight and save to db
         let weight = parseFloat(data.data);
         let now = new Date();
@@ -157,8 +191,11 @@ function saveStreamData(connectedDB, userId, deviceId, accessToken) {
           )
         }
       });
+      stream.on('error', function(err) {
+        console.log("Error getting event stream for " + userId);
+      });
     }, 
-    function(err) { console.log("Error getting event stream for " + userId); }
+    function(err) { console.log("Error getting cursor stream for " + userId); }
   );
 }
 
