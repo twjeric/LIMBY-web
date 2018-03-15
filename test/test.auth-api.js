@@ -99,7 +99,8 @@ describe('Api is accessible with token and perform correctly', () => {
             .get('/api/past/' + start + '/' + end)
             .end((err, res) => {
                 res.redirects.length.should.equal(0);
-                res.status.should.equal(401);
+                res.status.should.equal(200);
+                res.type.should.equal('json');
                 done();
             });
         });
