@@ -34,10 +34,10 @@
 	<p id="TimeScaleText">Showing Weights: Past Hour</p>
   </div>
    <button type="button" class="btn btn-secondary btn-lg" onclick="displayCurrentData()">Show Live Data</button>
-   <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToHour()">Show Weight Past Hour</button>
-   <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToDay()">Show Weight Past Day</button>
-   <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToWeek()">Show Weight Past Week</button>
-   <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToMonth()">Show Weight Past Month</button>
+   <button type="button" class="btn btn-secondary btn-lg" onclick="displayPastData(timeScale);ChangeTimeScaleToHour()">Show Weight Past Hour</button>
+   <button type="button" class="btn btn-secondary btn-lg" onclick="displayPastData(timeScale);ChangeTimeScaleToDay()">Show Weight Past Day</button>
+   <button type="button" class="btn btn-secondary btn-lg" onclick="displayPastData(timeScale);ChangeTimeScaleToWeek()">Show Weight Past Week</button>
+   <button type="button" class="btn btn-secondary btn-lg" onclick="displayPastData(timeScale);ChangeTimeScaleToMonth()">Show Weight Past Month</button>
    
    <form>
      Show Weights from:
@@ -224,9 +224,7 @@
 		
 		var xhttp = new XMLHttpRequest();
 		var response;
-		
 		xhttp.open("GET", "http://localhost:3000/api/past/"+pastMs.toString()+ "/" +nowMs.toString(), true);
-		//xhttp.setRequestHeader("Content-type", "application/json");
 		xhttp.send();
 		xhttp.addEventListener("readystatechange", processRequest, false);
 		function processRequest(e) 
@@ -275,7 +273,6 @@
 		weightChart.update();
 		var xhttp = new XMLHttpRequest();
 		var response;
-		
 		xhttp.open("GET", "http://localhost:3000/api/stream", true);
 		xhttp.send();
 		xhttp.addEventListener("readystatechange", processRequest, false);

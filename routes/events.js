@@ -17,15 +17,12 @@ router.get('/', auth, async (req, res, next) => {
         }
       });
       if (apiRes.status == 500) {
-        console.log(500);
         res.render('events', { "err": "Server couldn't start saving live data" });
       }
       else {
-        console.log(200);
         res.render('events', { "err": null });
       }
     } catch (err) {
-      console.log(1500);
       res.render('events', { "err": err });
     }
   }
