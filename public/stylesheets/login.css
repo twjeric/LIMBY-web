@@ -26,8 +26,7 @@ body
 	height: 400px;
 	background: #fff;
 	margin: 0 auto;
-	border: 2px solid #fff
-	box-shadow: 0 15px 40px rgba(0,0,0,.5);
+	border: 2px solid #fff;
 }
 
 .container .left
@@ -95,4 +94,8 @@ body
 	color: #0000ff;
 	font-size: 16px;
 	font-weight: bold;
+}
+
+.rememberMe input {
+	width: 0;
 }

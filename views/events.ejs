@@ -6,11 +6,18 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie-edge">
 	<link rel='stylesheet' href='/stylesheets/style.css' />
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
 	<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"> -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
-	<script type="text/javascript" src="https://cdn.jsdelivr.net/particle-api-js/5/particle.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 </head>
 <body>
+	<% if (err){ %>
+		<script>
+			toastr.warning(`<%=err%>`); 
+		</script>
+	<% } %>
 	<div class="navbar">
 		<a href="/">Home</a>
 		<div class="profile dropdown">
@@ -22,13 +29,15 @@
 		</div>
 	</div>	
   <div class="container">
-    <canvas id="myChart"></canvas>
+	<canvas id="myChart"></canvas>
+	<p id="LiveToggleText">Live Data: Off</p>
+	<p id="TimeScaleText">Showing Weights: Past Hour</p>
   </div>
    <button type="button" class="btn btn-secondary btn-lg" onclick="displayCurrentData()">Show Live Data</button>
-   <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToHour()">Show Weight Past Hour</button>
-   <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToDay()">Show Weight Past Day</button>
-   <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToWeek()">Show Weight Past Week</button>
-   <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToMonth()">Show Weight Past Month</button>
+   <button type="button" class="btn btn-secondary btn-lg" onclick="displayPastData(timeScale);ChangeTimeScaleToHour()">Show Weight Past Hour</button>
+   <button type="button" class="btn btn-secondary btn-lg" onclick="displayPastData(timeScale);ChangeTimeScaleToDay()">Show Weight Past Day</button>
+   <button type="button" class="btn btn-secondary btn-lg" onclick="displayPastData(timeScale);ChangeTimeScaleToWeek()">Show Weight Past Week</button>
+   <button type="button" class="btn btn-secondary btn-lg" onclick="displayPastData(timeScale);ChangeTimeScaleToMonth()">Show Weight Past Month</button>
    
    <form>
      Show Weights from:
@@ -43,25 +52,10 @@
    <p style = "font-size:18px"; id="TimeScaleText">Showing Weights for: Past Hour</p>
    <a style = "font-size:14px";id="myLink" title="Download" href="#" onclick="CreateCSV();return false;">Download this data</a>
    <br><br />
+   <button type="button" class="btn btn-primary btn-lg" onclick="CreateCSV();return false;">Download as csv</button>
+
   <script>
     var isRefreshingLive = false;
-    /* Particle Section
-     *
-     */
-    //var Particle = require('particle-api-js');
-    var particle = new Particle();
-    var token;
-
-    // Particle Login
-    particle.login({username: 'ko.wing.bird@gmail.com', password: 'qaz123QAZ'}).then(
-		function(data) {
-			token = data.body.access_token;
-			//window.alert(token)
-		},
-		function (err) {
-			console.log('Could not log in.', err);
-		}
-    );
 	
 	const MS_IN_A_MINUTE = 60000;
 	const MS_IN_AN_HOUR = 3600000;
@@ -234,9 +228,7 @@
 		
 		var xhttp = new XMLHttpRequest();
 		var response;
-		
 		xhttp.open("GET", "http://localhost:3000/api/past/"+pastMs.toString()+ "/" +nowMs.toString(), true);
-		//xhttp.setRequestHeader("Content-type", "application/json");
 		xhttp.send();
 		xhttp.addEventListener("readystatechange", processRequest, false);
 		function processRequest(e) 
@@ -255,43 +247,9 @@
 					
 					// Time display
 					var date = new Date(response[r].time);
-					var year = date.getYear() + EPOCH_CORRECTION_YEAR;
-					var month = date.getMonth() + EPOCH_CORRECTION_MONTH;
-					var day = date.getDate();
-					var hour = date.getHours();
-					var minute = date.getMinutes(); 
+					displayedDate = formattedTime(date, 'graph');
+					csvDate = formattedTime(date, 'csv');
 					
-					if (minute < 10)
-					{
-						minute = "0"+minute;
-					}	
-					
-					var second = date.getSeconds();		
-					if (second < 10)
-					{
-						second = "0"+second;
-					}	
-					
-					if (hour == 12)
-					{
-						amPm = "PM";
-					}
-					else if (hour > 12)
-					{
-						hour = 12 - (24 - hour);
-						amPm = "PM";
-					}			   
-					else if (hour == 0)
-					{
-						hour = 12;
-						amPm = "AM";
-					}
-					else
-					{
-						amPm = "AM";
-					}
-					var displayedDate = month+"/"+day+"  "+hour+":"+minute+":"+second+amPm;
-					var csvDate = month+"."+day+"."+year+", "+hour+":"+minute+":"+second+amPm;
 					displayedTimes.push(displayedDate);
 					csvTimes.push(csvDate);
 				   
@@ -312,9 +270,13 @@
 	
 	function displayCurrentData()
 	{
+		document.getElementById("TimeScaleText").innerHTML = "Showing Weights: Live";
+		displayedTimes.length = 0;
+		csvTimes.length = 0;
+		displayedWeights.length = 0;
+		weightChart.update();
 		var xhttp = new XMLHttpRequest();
 		var response;
-		
 		xhttp.open("GET", "http://localhost:3000/api/stream", true);
 		xhttp.send();
 		xhttp.addEventListener("readystatechange", processRequest, false);
@@ -324,46 +286,58 @@
 			{
 				var latestJson = JSON.parse(xhttp.responseText + ']');
 				var { [Object.keys(latestJson).pop()]: latest } = latestJson;
-				console.log(latest);
+				var date = new Date(latest.time);
+				displayedDate = formattedTime(date, 'graph');
+				csvDate = formattedTime(date, 'csv');
+			
+				displayedTimes.push(displayedDate);
+				csvTimes.push(csvDate);
+				displayedWeights.push(latest.value);
+				weightChart.update();
 			}
 		}
 	}
 
-    // Gets the weight readings periodically from Photon
-    /*particle.getEventStream({ deviceId: '360057000351353530373132', auth: '5a495ca3a878380c969a64b0c0dcafbc8099888a' }).then(function(stream) {
-      stream.on('event', function(data) {
-        console.log("Event: ", data.data);
-        console.log("Event time: ", data.published_at);
-
-        if (storedWeights.length == MAX_DATA_POINTS)
-        {
-          storedWeights.shift();
-          storedTimes.shift();
-        }
-
-        // Stores perch data into buffers
-        storedWeights.push(data.data);
-        storedTimes.push(data.published_at);
-
-        if (isRefreshingLive == true)
-        {
-          // After live data is turned on, the buffered data is updated to the graph
-          for (i = 0; i < storedTimes.length; i++)
-          {
-            if (displayedWeights.length == MAX_DATA_POINTS)
-            {
-              displayedWeights.shift();
-              displayedTimes.shift();
-
-              displayedWeights.push(storedWeights[i]);
-              displayedTimes.push(storedTimes[i]);
-            }
-          }
-        }
-
-        weightChart.update();
-      });
-    });*/
+	function formattedTime(date, target) {
+		var year = date.getYear() + EPOCH_CORRECTION_YEAR;
+		var month = date.getMonth() + EPOCH_CORRECTION_MONTH;
+		var day = date.getDate();
+		var hour = date.getHours();
+		var minute = date.getMinutes(); 
+		
+		if (minute < 10)
+		{
+			minute = "0"+minute;
+		}	
+		
+		var second = date.getSeconds();		
+		if (second < 10)
+		{
+			second = "0"+second;
+		}	
+		
+		if (hour == 12)
+		{
+			amPm = "PM";
+		}
+		else if (hour > 12)
+		{
+			hour = 12 - (24 - hour);
+			amPm = "PM";
+		}			   
+		else if (hour == 0)
+		{
+			hour = 12;
+			amPm = "AM";
+		}
+		else
+		{
+			amPm = "AM";
+		}
+		return (target == 'graph') ? 
+			(month+"/"+day+"  "+hour+":"+minute+":"+second+amPm) :
+			(month+"."+day+"."+year+", "+hour+":"+minute+":"+second+amPm)
+	}
 
     // Live Toggle Button
     function ToggleLive()
@@ -391,7 +365,7 @@
 	// Changes Time Scale text to reflect current graph time scale - Hour
 	function ChangeTimeScaleToHour()
 	{
-		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for: Past Hour";
+		document.getElementById("TimeScaleText").innerHTML = "Showing Weights: Past Hour";
 		if (isRefreshingLive == true && timeScale != SEARCH)
 		{
 			document.getElementById("LiveToggleText").innerHTML = "Live Data: On";
@@ -405,7 +379,7 @@
 	}	
 	function ChangeTimeScaleToDay()
 	{
-		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for: Past Day";
+		document.getElementById("TimeScaleText").innerHTML = "Showing Weights: Past Day";
 	    if (isRefreshingLive == true && timeScale != SEARCH)
 		{
 			document.getElementById("LiveToggleText").innerHTML = "Live Data: On";
@@ -419,7 +393,7 @@
 	}
 	function ChangeTimeScaleToWeek()
 	{
-		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for: Past Week";
+		document.getElementById("TimeScaleText").innerHTML = "Showing Weights: Past Week";
 	    if (isRefreshingLive == true && timeScale != SEARCH)
 		{
 			document.getElementById("LiveToggleText").innerHTML = "Live Data: On";
@@ -433,7 +407,7 @@
 	}
 	function ChangeTimeScaleToMonth()
 	{
-		document.getElementById("TimeScaleText").innerHTML = "Showing Weights for: Past Month";
+		document.getElementById("TimeScaleText").innerHTML = "Showing Weights: Past Month";
 	    if (isRefreshingLive == true && timeScale != SEARCH)
 		{
 			document.getElementById("LiveToggleText").innerHTML = "Live Data: On";

@@ -58,37 +58,34 @@ describe('Login route', () => {
         });
     });
 
-    // ** Will test after having the events page get data from db instead
     // Test login with real user created by test.register
-    // describe('Test3: GET /login?realUser', () => {
-    //     it('it should redirect to events page when real user login', (done) => {
-    //     var realUserQuery = '/login?email=' + testData.realParticleAct.email + '&password=' + testData.realParticleAct.password;
-    //     chai.request(app)
-    //         .get(realUserQuery)
-    //         .end((err, res) => {
-    //             res.redirects.length.should.equal(1);
-    //             res.status.should.equal(200);
-    //             res.type.should.equal('text/html');
-    //             res.text.should.contain('<title>Events</title>');
-    //             done();
-    //         });
-    //     });
-    // });
+    describe('Test3: GET /login?realUser', () => {
+        it('it should redirect to events page when real user login', (done) => {
+        var realUserQuery = '/login?email=' + testData.realParticleAct.email + '&password=' + testData.realParticleAct.password;
+        chai.request(app)
+            .get(realUserQuery)
+            .end((err, res) => {
+                res.redirects.length.should.equal(1);
+                res.status.should.equal(200);
+                res.type.should.equal('text/html');
+                res.text.should.contain('<title>Events</title>');
+                done();
+            });
+        });
+    });
 
-    // ** Will test after having the events page get data from db instead since this depends on test 3
-    // // Test get login page with jwt cookie
-    // describe('Test4: GET /login', () => {
-    //     it('it should redirect to events page with existing jwt cookie created by test3', (done) => {
-    //     chai.request(app)
-    //         .get('/login')
-    //         .end((err, res) => {
-    //             res.redirects.length.should.equal(1);
-    //             res.status.should.equal(200);
-    //             res.type.should.equal('text/html');
-    //             res.text.should.contain('<title>Events</title>');
-    //             done();
-    //         });
-    //     });
-    // });
-
+    // Test get login page with jwt cookie
+    describe('Test4: GET /login', () => {
+        it('it should redirect to events page with existing jwt cookie created by test3', (done) => {
+        chai.request(app)
+            .get('/login')
+            .end((err, res) => {
+                res.redirects.length.should.equal(1);
+                res.status.should.equal(200);
+                res.type.should.equal('text/html');
+                res.text.should.contain('<title>Events</title>');
+                done();
+            });
+        });
+    });
 });

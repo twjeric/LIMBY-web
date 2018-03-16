@@ -21,7 +21,7 @@ router.get('/', auth, function (req, res, next) {
 // Register user
 router.post('/', async (req, res, next) => {
     try {
-        var body = { email: req.body.email, password: req.body.password };
+        let body = { email: req.body.email, password: req.body.password };
         const apiRes = await fetch(config.endpointUrl + '/api/user', {
             method: 'POST',
             body:    JSON.stringify(body),
@@ -29,7 +29,6 @@ router.post('/', async (req, res, next) => {
         });
         if (apiRes.status == 200) {
             // Register done
-            req.success = true;
             res.render('login', { "err": null, "msg": "Registered successfully. Please log in :)" });
         }
         else {

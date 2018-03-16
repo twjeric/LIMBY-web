@@ -21,7 +21,7 @@ router.get('/', auth, function (req, res, next) {
 // Authenticate user
 router.post('/', async (req, res, next) => {
     try {
-        var body = { email: req.body.email, password: req.body.password };
+        let body = { email: req.body.email, password: req.body.password };
         const apiRes = await fetch(config.endpointUrl + '/api/auth', {
             method: 'POST',
             body:    JSON.stringify(body),
@@ -29,10 +29,11 @@ router.post('/', async (req, res, next) => {
         });
         if (apiRes.status == 200) {
             // Register done
+            let monthInMs = 30*24*60*60*1000;
             const tokenJson = await apiRes.json();
             if (req.body.remember == 'on') { // "Remember me" is selected, set 1-month cookie
                 res.cookie(config.jwtCookie, tokenJson['token'], {
-                    expires: new Date(Date.now() + 30*24*60*60*1000),
+                    expires: new Date(Date.now() + monthInMs),
                     httpOnly: true
                 });
             } 

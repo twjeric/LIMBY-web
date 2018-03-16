@@ -2,6 +2,7 @@
     "particleEndPointUrl": "https://api.particle.io",
     "particleDevicesApi": "/v1/devices",
     "endpointUrl": "http://localhost:3000",
+    "cloudEndpointUrl": "http://limby.azurewebsites.net",
     "mongodbUrl": "mongodb://localhost:27017",
     "secret": "8xpJl24Hur20veWeMrR5TFF7PE1NUCnmvHmL78AuSj5Pj74N3tLfAuSdqe7Hdkj",
     "dbName": "Limby",
@@ -10,5 +11,5 @@
     "jwtCookie": "limby-jwt",
     "salt": 10,
     "streamTimeOut": 300000,
-    "publishInterval": 10000
+    "publishInterval": 15000
 }
