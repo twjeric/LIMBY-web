@@ -160,7 +160,7 @@
 					},
 					fontFamily: 'Courier New',
 					ticks: {
-						beginAtZero: true,
+						scaleBeginAtZero: true,
 						//steps: 40,
 						stepSize: 1000,
 						min: -60000,
@@ -309,10 +309,15 @@
 					Math.max(
 						Math.max.apply(null, displayedWeights), 
 						Math.abs(Math.min.apply(null, displayedWeights))))));
+						
 			weightChart.config.options.scales.yAxes[0].ticks.min = 
-				Math.round((Math.min.apply(null, displayedWeights) - nearestPowerOfTen)/nearestPowerOfTen)*nearestPowerOfTen;
+				Math.min(
+					0,
+				Math.round((Math.min.apply(null, displayedWeights) - nearestPowerOfTen)/nearestPowerOfTen)*nearestPowerOfTen);
 			weightChart.config.options.scales.yAxes[0].ticks.max = 
-				Math.round((Math.max.apply(null, displayedWeights) + nearestPowerOfTen)/nearestPowerOfTen)*nearestPowerOfTen;
+			    Math.max(
+					0,
+					Math.round((Math.max.apply(null, displayedWeights) + nearestPowerOfTen)/nearestPowerOfTen)*nearestPowerOfTen);
 				
 			weightChart.config.options.scales.yAxes[0].ticks.stepSize = nearestPowerOfTen; 
 	
