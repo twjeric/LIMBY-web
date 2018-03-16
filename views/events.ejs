@@ -48,10 +48,6 @@
    <button type="button" class="btn btn-default btn-lg" onclick="TimeScaleSearch()">Search</button>
    <p <br /></p>
    <button type="button" class="btn btn-primary btn-lg" onclick="ToggleLive()">Toggle Live Refresh</button>
-   <p style = "font-size:18px"; id="LiveToggleText">Live Data: Off</p>
-   <p style = "font-size:18px"; id="TimeScaleText">Showing Weights for: Past Hour</p>
-   <a style = "font-size:14px";id="myLink" title="Download" href="#" onclick="CreateCSV();return false;">Download this data</a>
-   <br><br />
    <button type="button" class="btn btn-primary btn-lg" onclick="CreateCSV();return false;">Download as csv</button>
 
   <script>
@@ -83,7 +79,6 @@
 	
 	var startUtc;
 	var endUtc;
-
     // Data arrays
     /* displayedTimes and displayedWeights weights are hooked to the graph.
        Changing them will automatically show on the graph.
@@ -92,20 +87,17 @@
     var displayedWeights = []; // Recorded weights
 	
 	var csvTimes = [];
-
     // These are the buffers that will hold the perch data before they are displayed to the graph
     var storedTimes = [];
     var storedWeights = [];
 	
 	var windowMinimum;
 	var windowMaximum;
-
     // Initialize data arrays
     for (i = 0; i < MAX_DATA_POINTS; i++)
     {
 		displayedWeights.push(0);
 		displayedTimes.push("");
-
 		storedTimes.push(0);
 		storedWeights.push("");
     }
@@ -114,15 +106,12 @@
      *
      */
     let myChart = document.getElementById('myChart').getContext('2d');
-
     //Global options
     Chart.defaults.global.defaultFontFamily = 'Ariel';
     Chart.defaults.global.defaultFontSize = 18;
-
     var weightChart = new Chart(myChart, {
 		// Graph Type
 		type: 'line', // Types: bar, horizontalBar, pie, line, doughnut, radar, polarArea
-
 		// Data Displayed
 		data:{
 			// x axis names
@@ -138,7 +127,6 @@
 				hoverBorderColor:'#000'
 			}]
 		},
-
 		// Graph Auxillary Options - title, legend, etc.
 		options:{
 			title:{
@@ -180,13 +168,11 @@
 				}]
 			},
 			layout:{
-
 			}
         }
     });
 	
     displayPastData(timeScale);
-
 	/* Requests previous weight data from server.
 	   1 Hour = 3,600,000 ms
 	   1 Day = 86,400,000 ms
@@ -239,7 +225,6 @@
 			if (xhttp.readyState == 4 && xhttp.status == 200) 
 			{
 				response = JSON.parse(xhttp.responseText);				
-
 				// response structure: _id, userid, time, value
 				for (var r in response)
 				{
@@ -257,13 +242,11 @@
 					displayedWeights.push(response[r].value);
 				}
 			}
-
 			// Changes graph scale depending on currently displayed data
 			weightChart.config.options.scales.yAxes[0].ticks.min = 
 				Math.round((Math.min.apply(null, displayedWeights) - AXES_BUFFER)/1000)*1000;
 			weightChart.config.options.scales.yAxes[0].ticks.max = 
 				Math.round((Math.max.apply(null, displayedWeights) + AXES_BUFFER)/1000)*1000;
-
 			weightChart.update();
 		}
 	}
@@ -297,7 +280,6 @@
 			}
 		}
 	}
-
 	function formattedTime(date, target) {
 		var year = date.getYear() + EPOCH_CORRECTION_YEAR;
 		var month = date.getMonth() + EPOCH_CORRECTION_MONTH;
@@ -338,13 +320,11 @@
 			(month+"/"+day+"  "+hour+":"+minute+":"+second+amPm) :
 			(month+"."+day+"."+year+", "+hour+":"+minute+":"+second+amPm)
 	}
-
     // Live Toggle Button
     function ToggleLive()
     {
 		isRefreshingLive = !isRefreshingLive;
 		console.log(isRefreshingLive);
-
 		// Changes Live Data text accordingly
 		if(timeScale == SEARCH)
 		{
@@ -362,7 +342,7 @@
 		}
     }
 	
-	// Changes Time Scale text to reflect current graph time scale - Hour
+	// Changes Time Scale text to reflect current graph time scale
 	function ChangeTimeScaleToHour()
 	{
 		document.getElementById("TimeScaleText").innerHTML = "Showing Weights: Past Hour";
@@ -376,7 +356,7 @@
 		}
 	    timeScale = HOUR;
 		displayPastData(timeScale);
-	}	
+	}
 	function ChangeTimeScaleToDay()
 	{
 		document.getElementById("TimeScaleText").innerHTML = "Showing Weights: Past Day";
@@ -419,8 +399,6 @@
 		timeScale = MONTH;
 	    displayPastData(timeScale);
 	}
-	
-	// Takes in a search start day and a search end day and calls the data fetch method
 	function TimeScaleSearch()
 	{
 	    var startDate = document.getElementById("startDate").value;
@@ -457,7 +435,6 @@
 	function CreateCSV()
 	{
 		var csvRows = [];
-
 		csvRows.push("Date, Time, Weight in Grams");
 		
 		// Combines times and weights
@@ -469,13 +446,11 @@
 		// Puts a new row after every vector element
 		var csvString = Array.prototype.join.call(csvRows, "\n");
 		csvRows.push(csvString);
-
 		// Creates CSV and prompts download
 		var a = document.createElement('a');
 		a.href = 'data:attachment/csv,' +  encodeURIComponent(csvString);
 		a.target = '_blank';
 		a.download = 'birdWeights.csv';
-
 		document.body.appendChild(a);
 		a.click();
 	}
