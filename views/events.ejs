@@ -161,7 +161,7 @@
 					fontFamily: 'Courier New',
 					ticks: {
 						beginAtZero: true,
-						steps: 40,
+						//steps: 40,
 						stepSize: 1000,
 						min: -60000,
 						max: 60000
@@ -304,10 +304,18 @@
 			}					
 			
 			// Changes graph scale depending on currently displayed data
+			var nearestPowerOfTen = 
+				Math.pow(10, Math.floor(Math.log10(
+					Math.max(
+						Math.max.apply(null, displayedWeights), 
+						Math.abs(Math.min.apply(null, displayedWeights))))));
 			weightChart.config.options.scales.yAxes[0].ticks.min = 
-				Math.round((Math.min.apply(null, displayedWeights) - AXES_BUFFER)/1000)*1000;
+				Math.round((Math.min.apply(null, displayedWeights) - nearestPowerOfTen)/nearestPowerOfTen)*nearestPowerOfTen;
 			weightChart.config.options.scales.yAxes[0].ticks.max = 
-				Math.round((Math.max.apply(null, displayedWeights) + AXES_BUFFER)/1000)*1000;
+				Math.round((Math.max.apply(null, displayedWeights) + nearestPowerOfTen)/nearestPowerOfTen)*nearestPowerOfTen;
+				
+			weightChart.config.options.scales.yAxes[0].ticks.stepSize = nearestPowerOfTen; 
+	
 			weightChart.update();
 		}
 	}
