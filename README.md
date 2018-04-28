@@ -8,5 +8,6 @@
 
 ## In progress:
 
-- Use AWS as online database
+- [x] Use mLab as online database
+- [ ] Script for getting data from Particle to mLab
 
