@@ -36,7 +36,7 @@ DB.prototype.connect = function(url, dbName) {
                 MongoClient.connect(url)
                 .then(
                     function(database) {
-                        __this.db = database;
+                        __this.db = database.db(dbName);
                         console.log("Connected successfully to database");
                         resolve();
                     },

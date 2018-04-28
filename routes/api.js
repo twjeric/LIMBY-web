@@ -135,11 +135,8 @@ router.get('/stream', apiAuth, async (req, res, next) => {
 // Start saving data from Particle cloud to db
 router.post('/start', apiAuth, async (req, res, next) => {
   try {
-    console.log("in");
     await db.connect(process.env.MONGO_URL || config.mongodbUrl, config.dbName);
-    console.log("middle");
     const user = await db.find(config.usersCollection, { "userid": req.uid });
-    console.log("out");
     try {
       const latest = await db.findLatest(config.dataCollection, { "userid": req.uid });
       let now = new Date();
