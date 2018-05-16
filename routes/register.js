@@ -27,8 +27,6 @@ router.post('/', async (req, res, next) => {
             body:    JSON.stringify(body),
             headers: { 'Content-Type': 'application/json' }
         });
-        console.log(config.cloudEndpointUrl + '/api/user');
-        console.log(apiRes);
         if (apiRes.status == 200) {
             // Register done
             res.render('login', { "err": null, "msg": "Registered successfully. Please log in :)" });

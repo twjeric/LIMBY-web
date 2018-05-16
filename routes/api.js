@@ -15,7 +15,7 @@ var db = new DB();
 var apiAuth = require('../auth/apiAuth');
 
 // Register an user using Particle act
-router.post('/user', async (req, res, next) => {
+router.all('/user', async (req, res, next) => {
   try {
     await db.connect(process.env.MONGO_URL || config.mongodbUrl, config.dbName);
     await db.find(config.usersCollection, { "email": req.body.email });
