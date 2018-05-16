@@ -1,7 +1,7 @@
 {
     "particleEndPointUrl": "https://api.particle.io",
     "particleDevicesApi": "/v1/devices",
-    "endpointUrl": "http://localhost:3000",
+    "endpointUrl": "http://ec2-18-219-123-254.us-east-2.compute.amazonaws.com",
     "cloudEndpointUrl": "http://limby.azurewebsites.net",
     "mongodbUrl": "mongodb://root:toor@ds155577.mlab.com:55577/limby",
     "secret": "8xpJl24Hur20veWeMrR5TFF7PE1NUCnmvHmL78AuSj5Pj74N3tLfAuSdqe7Hdkj",

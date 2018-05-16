@@ -22,7 +22,7 @@ router.get('/', auth, function (req, res, next) {
 router.post('/', async (req, res, next) => {
     try {
         let body = { email: req.body.email, password: req.body.password };
-        const apiRes = await fetch('http://ec2-18-219-123-254.us-east-2.compute.amazonaws.com/auth', {
+        const apiRes = await fetch(config.endpointUrl + '/auth', {
             method: 'POST',
             body:    JSON.stringify(body),
             headers: { 'Content-Type': 'application/json' }
