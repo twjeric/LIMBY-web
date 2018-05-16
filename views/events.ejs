@@ -218,7 +218,7 @@
 		
 		var xhttp = new XMLHttpRequest();
 		var response;
-		xhttp.open("GET", "http://localhost:3000/api/past/"+pastMs.toString()+ "/" +nowMs.toString(), true);
+		xhttp.open("GET", "/api/past/"+pastMs.toString()+ "/" +nowMs.toString(), true); //url?
 		xhttp.send();
 		xhttp.addEventListener("readystatechange", processRequest, false);
 		function processRequest(e) 
@@ -334,7 +334,7 @@
 		weightChart.update();
 		var xhttp = new XMLHttpRequest();
 		var response;
-		xhttp.open("GET", "http://localhost:3000/api/stream", true);
+		xhttp.open("GET", "/api/stream", true);//url?
 		xhttp.send();
 		xhttp.addEventListener("readystatechange", processRequest, false);
 		function processRequest(e) 

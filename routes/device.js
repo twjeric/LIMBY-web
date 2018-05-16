@@ -11,7 +11,7 @@ router.get('/', auth, async (req, res, next) => {
         res.redirect('/login');
     }
     else {
-        const apiRes = await fetch(config.endpointUrl + '/api/device', {
+        const apiRes = await fetch(config.cloudEndpointUrl + '/api/device', {
             method: 'GET',
             headers: {
                 cookie: config.jwtCookie + '=' + req.cookies[config.jwtCookie]

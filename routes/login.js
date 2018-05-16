@@ -22,7 +22,7 @@ router.get('/', auth, function (req, res, next) {
 router.post('/', async (req, res, next) => {
     try {
         let body = { email: req.body.email, password: req.body.password };
-        const apiRes = await fetch(config.endpointUrl + '/api/auth', {
+        const apiRes = await fetch(config.cloudEndpointUrl + '/api/auth', {
             method: 'POST',
             body:    JSON.stringify(body),
             headers: { 'Content-Type': 'application/json' }
