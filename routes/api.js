@@ -116,7 +116,7 @@ router.get('/stream', apiAuth, async (req, res, next) => {
     .then(
       function(stream) {
         stream.on('error', function(err) {
-          res.status(500).send(err.message);
+          res.status(501).send(err.message);
         });
         stream.on('end', function() {
           res.end();
@@ -124,11 +124,11 @@ router.get('/stream', apiAuth, async (req, res, next) => {
         stream.pipe(JSONStream.stringify()).pipe(res.type('json'), {end:false});
       },
       function(err) {
-        res.status(500).send("Error getting data stream");
+        res.status(502).send("Error getting data stream");
       }
     )
   } catch (err) {
-    res.status(500).send("Error getting data stream");
+    res.status(503).send("Error getting data stream");
   }
 })
 
