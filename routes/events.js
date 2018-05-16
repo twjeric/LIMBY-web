@@ -10,7 +10,7 @@ router.get('/', auth, async (req, res, next) => {
   // User logged in
   if (req.auth) {
     try {
-      const apiRes = await fetch(config.endpointUrl + '/api/start', {
+      const apiRes = await fetch(config.cloudEndpointUrl + '/api/start', {
         method: 'POST',
         headers: {
           cookie: config.jwtCookie + '=' + req.cookies[config.jwtCookie]
