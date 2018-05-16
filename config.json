@@ -6,7 +6,7 @@
     "mongodbUrl": "mongodb://root:toor@ds155577.mlab.com:55577/limby",
     "secret": "8xpJl24Hur20veWeMrR5TFF7PE1NUCnmvHmL78AuSj5Pj74N3tLfAuSdqe7Hdkj",
     "dbName": "limby",
-    "usersCollection": "users",
+    "usersCollection": "Users",
     "dataCollection": "Data",
     "jwtCookie": "limby-jwt",
     "salt": 10,
