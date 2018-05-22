@@ -14,7 +14,7 @@ def save(data):
     userid = 143744072
     doc = {}
     doc["userid"]=userid
-    doc["time"] = int(time.time())
+    doc["time"] = int(round(time.time() * 1000))
     doc["value"] = data[29:33]
     col.insert_one(doc)  
 
