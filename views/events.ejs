@@ -33,7 +33,6 @@
 	<p id="LiveToggleText">Live Data: Off</p>
 	<p id="TimeScaleText">Showing Weights: Past Hour</p>
   </div>
-   <button type="button" class="btn btn-secondary btn-lg" onclick="displayCurrentData()">Show Live Data</button>
    <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToHour()">Show Weight Past Hour</button>
    <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToDay()">Show Weight Past Day</button>
    <button type="button" class="btn btn-secondary btn-lg" onclick="ChangeTimeScaleToWeek()">Show Weight Past Week</button>
@@ -325,35 +324,6 @@
 		}
 	}
 	
-	function displayCurrentData()
-	{
-		document.getElementById("TimeScaleText").innerHTML = "Showing Weights: Live";
-		displayedTimes.length = 0;
-		csvTimes.length = 0;
-		displayedWeights.length = 0;
-		weightChart.update();
-		var xhttp = new XMLHttpRequest();
-		var response;
-		xhttp.open("GET", "/api/stream", true);//url?
-		xhttp.send();
-		xhttp.addEventListener("readystatechange", processRequest, false);
-		function processRequest(e) 
-		{
-			if (xhttp.readyState == 3 && xhttp.status == 200) 
-			{
-				var latestJson = JSON.parse(xhttp.responseText + ']');
-				var { [Object.keys(latestJson).pop()]: latest } = latestJson;
-				var date = new Date(latest.time);
-				displayedDate = formattedTime(date, 'graph');
-				csvDate = formattedTime(date, 'csv');
-			
-				displayedTimes.push(displayedDate);
-				csvTimes.push(csvDate);
-				displayedWeights.push(latest.value);
-				weightChart.update();
-			}
-		}
-	}
 	
 	// Takes a Date object and formats it for graph and csv output
 	function formattedTime(dateValue, target) {
