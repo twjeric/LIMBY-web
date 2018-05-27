@@ -173,7 +173,7 @@
         }
     });
 	
-    displayPastData(timeScale);
+    //displayPastData(timeScale);
 	/* Requests previous weight data from server.
 	   1 Hour = 3,600,000 ms
 	   1 Day = 86,400,000 ms
@@ -218,7 +218,7 @@
 		
 		var xhttp = new XMLHttpRequest();
 		var response;
-		xhttp.open("GET", "/api/past/"+pastMs.toString()+ "/" +nowMs.toString(), true); //url?
+		xhttp.open("GET", "/api/past/"+pastMs.toString()+ "/" +nowMs.toString(), true);
 		xhttp.send();
 		xhttp.addEventListener("readystatechange", processRequest, false);
 		function processRequest(e) 
@@ -334,7 +334,7 @@
 		weightChart.update();
 		var xhttp = new XMLHttpRequest();
 		var response;
-		xhttp.open("GET", "/api/stream", true);//url?
+		xhttp.open("GET", "/api/stream", true);
 		xhttp.send();
 		xhttp.addEventListener("readystatechange", processRequest, false);
 		function processRequest(e) 

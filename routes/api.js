@@ -112,7 +112,7 @@ router.get('/stream', apiAuth, async (req, res, next) => {
   try {
     await db.connect(process.env.MONGO_URL || config.mongodbUrl, config.dbName);
     let now = new Date();
-    db.stream(config.dataCollection, { $and: [{"userid": req.uid}, {"time":{$gte: now.getTime()}}] })
+    db.stream(config.dataCollection, { $and: [{"userid": req.uid}, {"time":{$gte: 1524950000000}}] })//now.getTime()
     .then(
       function(stream) {
         stream.on('error', function(err) {
