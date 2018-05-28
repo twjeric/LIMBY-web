@@ -75,7 +75,7 @@
 	
 	// How often 'live refresh' refreshes
 	const LIVE_REFRESH_RATE = 10000;
-	var timeScale = HOUR;
+	var timeScale = MONTH;
     var dataLoop;
 	
 	var startUtc;
@@ -173,7 +173,7 @@
         }
     });
 	
-    displayPastData(MONTH);
+    displayPastData(timeScale);
 	/* Requests previous weight data from server.
 	   1 Hour = 3,600,000 ms
 	   1 Day = 86,400,000 ms
