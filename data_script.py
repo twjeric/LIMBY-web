@@ -15,7 +15,7 @@ def save(data):
     doc = {}
     doc["userid"]=userid
     doc["time"] = int(round(time.time() * 1000))
-    doc["value"] = data[29:33]
+    doc["value"] = int(data[29:33])
     col.insert_one(doc)  
 
 def on_receive(data):
