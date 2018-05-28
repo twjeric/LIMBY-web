@@ -168,6 +168,7 @@ router.post('/start', apiAuth, async (req, res, next) => {
 
 // Used by api/start
 function saveStreamData(connectedDB, userId, deviceId, accessToken) {
+  /*
   particle.getEventStream({ deviceId: deviceId, auth: accessToken })
   .then(
     function(stream) {
@@ -197,6 +198,7 @@ function saveStreamData(connectedDB, userId, deviceId, accessToken) {
     }, 
     function(err) { console.log("Error getting cursor stream for " + userId); }
   );
+  */
 }
 
 // Hash string to int (create userid)
