@@ -9,5 +9,7 @@
 ## In progress:
 
 - [x] Use mLab as online database
-- [ ] Script for getting data from Particle to mLab
+- [x] Script for getting data from Particle to mLab
+- [ ] Debug live data stream
+- [ ] SEO
 
