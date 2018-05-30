@@ -11,5 +11,5 @@
 - [x] Use mLab as online database
 - [x] Script for getting data from Particle to mLab
 - [ ] Debug live data stream
-- [ ] SEO
+- [x] SEO
 
