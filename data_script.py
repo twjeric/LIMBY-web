@@ -15,7 +15,10 @@ def save(data):
     doc = {}
     doc["userid"]=userid
     doc["time"] = int(round(time.time() * 1000))
-    doc["value"] = int(data[29:33])
+    val = data[29:36].decode("utf-8")
+    print(val)
+    doc["value"] = int(float(val))
+    print(doc)
     col.insert_one(doc)  
 
 def on_receive(data):
